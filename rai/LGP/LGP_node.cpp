@@ -101,6 +101,21 @@ void LGP_Node::expand(int verbose) {
   isExpanded=true;
 }
 
+void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
+  if(isExpanded) return; //{ LOG(-1) <<"MNode '" <<*this <<"' is already expanded"; return; }
+  CHECK(!children.N,"don't expand children one bz one??");
+  CHECK(!isTerminal, "cant expand terminal");
+
+  fol.setState(folState, step);
+  int tmp=fol.verbose;
+  fol.verbose=verbose;
+  NodeL symbols = actionLiteral->parents;
+  FOL_World::Handle action = FOL_World::Handle(new FOL_World::Decision(false, symbols.first(), symbols({1,-1}), -1));
+  fol.verbose=tmp;
+
+  new LGP_Node(this, action);
+}
+
 void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   if(komoProblem(bound)) komoProblem(bound).reset();
   komoProblem(bound) = make_shared<KOMO>();
@@ -139,8 +154,8 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
 
   for(ptr<Objective>& o:tree->finalGeometryObjectives.objectives) {
     cout <<"FINAL objective: " <<*o <<endl;
-    ptr<Objective> co = komo->addObjective({0.}, o->feat, {}, o->type);
-    co->setCostSpecs(komo->T-1, komo->T-1);
+    ptr<Objective> co = komo->addObjective({(double)(komo->T-1), (double)(komo->T-1)}, o->feat, {}, o->type);
+//    co->setCostSpecs(komo->T-1, komo->T-1);
     cout <<"FINAL objective: " <<*co <<endl;
   }
 

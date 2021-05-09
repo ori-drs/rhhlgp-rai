@@ -125,15 +125,7 @@ PoseBound::PoseBound(ptr<KOMO>& komo,
   //          o->vars.clear();
   //        }
   //      }
-  for(ptr<Objective>& o:komo->objectives) {
-    if(!std::dynamic_pointer_cast<F_qItself>(o->feat)
-//        && !std::dynamic_pointer_cast<TM_NoJumpFromParent>(o->feat)
-       && !std::dynamic_pointer_cast<F_Pose>(o->feat)
-       && !std::dynamic_pointer_cast<F_PoseRel>(o->feat)
-       && o->feat->order>0) {
-      o->configs.clear();
-    }
-  }
+
   for(ptr<GroundedObjective>& o:komo->objs) {
     if(!std::dynamic_pointer_cast<F_qItself>(o->feat)
        && !std::dynamic_pointer_cast<F_Pose>(o->feat)

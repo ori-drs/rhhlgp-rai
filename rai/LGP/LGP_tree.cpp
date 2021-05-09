@@ -360,7 +360,10 @@ LGP_Node* LGP_Tree::walkToNode(const rai::String& seq) {
   LGP_Node* node = root;
   for(Node* actionLiteral:tmp) {
 //    if(specificBound==BD_all || specificBound==BD_pose) node->optBound(BD_pose, collisions); //optimize poses along the path
-    if(!node->isExpanded) node->expand();
+    if(!node->isExpanded) {
+//      node->expand();
+      node->expandSingleChild(actionLiteral);
+    }
     LGP_Node* next = node->getChildByAction(actionLiteral);
     if(!next) LOG(-2) <<"action '" <<*actionLiteral <<"' is not a child of '" <<*node <<"'";
     node = next;
