@@ -581,7 +581,7 @@ void KOMO::setSkeleton(const Skeleton& S) {
         break;
       }
       case SY_touchBoxNormalZ: {
-        rai::Frame* box = world.getFrame(s.frames(1));
+        /*rai::Frame* box = world.getFrame(s.frames(1));
         CHECK(box, "");
         CHECK(box->shape, "");
         double boxSize = 0.;
@@ -593,7 +593,12 @@ void KOMO::setSkeleton(const Skeleton& S) {
         addObjective({s.phase0}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{0.,0.,1e2}}, {0,0,.5*boxSize}); //arr({1,3},{0,0,1e2})
         addObjective({s.phase0}, FS_scalarProductZZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {1.});
 //        addObjective({s.phase0}, FS_vectorZDiff, {s.frames(0), s.frames(1)}, OT_eq, {1e2});
-        break;
+        break;*/
+				/* FIXED: This is working now */
+				double boxSize = shapeSize(world, s.frames(1), 1);
+				addObjective({s.phase0}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{1e2,.0,.0}}, {.5*boxSize,0.,0.}); //arr({1,3},{0,0,1e2})
+				addObjective({s.phase0}, FS_scalarProductXY, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {1.});
+				break;
       }
 
       case SY_makeFree:   world.makeObjectsFree(s.frames);  break;
