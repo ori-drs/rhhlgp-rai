@@ -615,6 +615,16 @@ void KOMO::setSkeleton(const Skeleton& S) {
 
       case SY_break:      addObjective({s.phase0, s.phase1}, make_shared<F_NoJumpFromParent_OBSOLETE>(), {s.frames(0)}, OT_eq, {1e2}, NoArr, 1, 0, 0);  break;
 
+      case SY_connectBananas: {
+				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
+				addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
+				// addObjective({s.phase0+.1, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
+				addObjective({s.phase0+.1, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// this is to make the ends touch at their tips and not side to side
+				addObjective({s.phase0+.1, s.phase0+.5}, FS_vectorY, {s.frames(0)}, OT_eq, {1e2}, {0., 1., 0.});
+      	// switch to stable after??
+				addModeSwitch({s.phase0+1., s.phase1}, SY_stable, {s.frames(0), s.frames(1)}, true);
+			} break;
+
       case SY_contact:    addContact_slide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
       case SY_contactStick:    addContact_stick(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
       case SY_contactComplementary: addContact_ComplementarySlide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
