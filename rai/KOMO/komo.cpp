@@ -619,10 +619,10 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
-				addObjective({s.phase0+.1, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// problem: this requires to know the shape of the walkers
+				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// problem: this requires to know the shape of the walkers
 
 				// switch to stable after??
-				addModeSwitch({s.phase0+1., s.phase1}, SY_stable, {s.frames(0), s.frames(1)}, true);
+				// addModeSwitch({s.phase0+1., s.phase1}, SY_stable, {s.frames(0), s.frames(1)}, true);
 			} break;
 
       case SY_contact:    addContact_slide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
