@@ -476,14 +476,15 @@ LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe, int stopOnDepth) {
 	}
 	if(!best) return nullptr;
 	fringe.removeValue(best);
+	cout << "BEST H VAL: " << best->hValue << endl;
 	return best;
 }
 
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-  LGP_Node* n =  fringe_expand.popFirst();
-  // LGP_Node* n = popBestH(fringe_expand, stopOnDepth);
+  // LGP_Node* n =  fringe_expand.popFirst();
+  LGP_Node* n = popBestH(fringe_expand, stopOnDepth);
   // cout << "EXPANDING ON LEVEL: " << n->step << endl;
 
   CHECK(n, "");
@@ -507,7 +508,7 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
 void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawFrom, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren) { //optimize a seq
   if(!drawFringe.N) return;
   LGP_Node* n = popBest(drawFringe, drawFrom);
-  cout << "EXPANDING optBestOnLevel: " << n << endl;
+  // cout << "EXPANDING optBestOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
       n->optBound(bound, collisions, verbose-2);
@@ -528,7 +529,7 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
 void LGP_Tree::optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* addIfTerminal) {
   if(!fringe.N) return;
   LGP_Node* n =  fringe.popFirst();
-  cout << "EXPANDING optFirstOnLevel: " << n << endl;
+  // cout << "EXPANDING optFirstOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
       n->optBound(bound, collisions, verbose-2);
@@ -597,7 +598,7 @@ void LGP_Tree::step() {
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
   if(fringe_solved.N>numSol) {
-    if(verbose>0) cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString() <<endl;
+    if(verbose>0) cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString() <<" hVal: " <<fringe_solved.last()->hValue <<endl;
     solutions.set()->append(new LGP_Tree_SolutionData(*this, fringe_solved.last()));
     solutions.set()->sort(sortComp2);
   }

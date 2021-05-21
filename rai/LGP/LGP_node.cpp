@@ -103,23 +103,24 @@ void LGP_Node::expand(int verbose) {
 }
 
 // TODO: find some heuristic to properly set the costs here
-// TODO: the costs seem to get overwritten somewhere
 void LGP_Node::setHeuristic() {
-	if(decision){
-		const FOL_World::Decision* d = std::dynamic_pointer_cast<const FOL_World::Decision>(decision).get();
-		if ((step % 3) == 0) {
-			if (d->rule->key == "place") hValue += 20;
-			else if (d->rule->key == "pick") hValue += 5;
-			else hValue += 10;
+	// if(folDecision) cout <<"FOL STATE: " << size(folState->list()).first() <<endl;
+	if(decision && parent->decision){
+		rai::String currentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(decision)->rule->key;
+		rai::String parentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(parent->decision)->rule->key;
+		if(parentDecision == "pick"){
+			if (currentDecision == "place") hValue += 0;
+			else if (currentDecision == "pick") hValue += 10;
+			else hValue += 5;
 		}
-		else {
-			if (d->rule->key == "place") hValue += 5;
-			else if (d->rule->key == "pick") hValue += 20;
-			else hValue += 10;
+		else if (currentDecision == "place"){
+			if (currentDecision == "place") hValue += 10;
+			else if (currentDecision == "pick") hValue += 0;
+			else hValue += 5;
 		}
 	}
-	// hValue += 0;
-	// cout << "SET COSTS: " << cost(step) << endl;
+	// hValue = size(folState->list()).first(); // this is working terribly
+	// cout << "H COSTS: " << hValue << endl;
 }
 
 void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
