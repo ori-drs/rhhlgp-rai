@@ -94,7 +94,11 @@ void initFolStateFromKin(FOL_World& L, const rai::Configuration& K) {
       for(rai::Frame* b:F) if(b!=a && b->shape && b->ats && (*b->ats)["logical"]) {
           L.addFact({"on", b->name, a->name});
         }
-    }
+  }
+  // adding equalities to init state
+  for(rai::Frame* a:K.frames) if(a->shape && a->ats && (*a->ats)["logical"]) {
+			L.addFact({"equal", a->name, a->name});
+  }
 }
 
 LGP_Tree::LGP_Tree()
@@ -461,15 +465,32 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
   return best;
 }
 
+// finds the next node to expand based on hValue
+LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe, int stopOnDepth) {
+	if(!fringe.N) return nullptr;
+	LGP_Node* best = nullptr;
+	// best = fringe.popFirst();
+	for(LGP_Node* n:fringe) {
+		if (n->isInfeasible) continue;
+		if(!best || (n->hValue < best->hValue)) best=n;
+	}
+	if(!best) return nullptr;
+	fringe.removeValue(best);
+	return best;
+}
+
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
   LGP_Node* n =  fringe_expand.popFirst();
+  // LGP_Node* n = popBestH(fringe_expand, stopOnDepth);
+  // cout << "EXPANDING ON LEVEL: " << n->step << endl;
 
   CHECK(n, "");
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
   for(LGP_Node* ch:n->children) {
+  	ch->setHeuristic();										// this sets the heuristic value in the node
     if(ch->isTerminal) {
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
@@ -486,6 +507,7 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
 void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawFrom, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren) { //optimize a seq
   if(!drawFringe.N) return;
   LGP_Node* n = popBest(drawFringe, drawFrom);
+  cout << "EXPANDING optBestOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
       n->optBound(bound, collisions, verbose-2);
@@ -506,6 +528,7 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
 void LGP_Tree::optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* addIfTerminal) {
   if(!fringe.N) return;
   LGP_Node* n =  fringe.popFirst();
+  cout << "EXPANDING optFirstOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
       n->optBound(bound, collisions, verbose-2);
@@ -568,7 +591,7 @@ void LGP_Tree::step() {
   uint numSol = fringe_solved.N;
 
 //  if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
-  optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
+	optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
   optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);

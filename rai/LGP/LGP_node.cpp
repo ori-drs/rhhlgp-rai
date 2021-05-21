@@ -44,7 +44,7 @@ void LGP_Node::resetData() {
 
 LGP_Node::LGP_Node(LGP_Tree* _tree, uint levels)
   : parent(nullptr), tree(_tree), step(0), time(0.), id(COUNT_node++),
-    fol(tree->fol),
+    fol(tree->fol), hValue(0),
     startKinematics(tree->kin),
     L(levels) {
   //this is the root node!
@@ -58,7 +58,7 @@ LGP_Node::LGP_Node(LGP_Tree* _tree, uint levels)
 
 LGP_Node::LGP_Node(LGP_Node* parent, MCTS_Environment::Handle& a)
   : parent(parent), tree(parent->tree), step(parent->step+1), id(COUNT_node++),
-    fol(parent->fol),
+    fol(parent->fol), hValue(parent->hValue),
     startKinematics(parent->startKinematics),
     L(parent->L) {
   parent->children.append(this);
@@ -85,6 +85,7 @@ LGP_Node::~LGP_Node() {
 }
 
 void LGP_Node::expand(int verbose) {
+	// cout << " Expanding: " << *this << endl;
   if(isExpanded) return; //{ LOG(-1) <<"MNode '" <<*this <<"' is already expanded"; return; }
   CHECK(!children.N, "");
   if(isTerminal) return;
@@ -99,6 +100,26 @@ void LGP_Node::expand(int verbose) {
   }
   if(!children.N) isTerminal=true;
   isExpanded=true;
+}
+
+// TODO: find some heuristic to properly set the costs here
+// TODO: the costs seem to get overwritten somewhere
+void LGP_Node::setHeuristic() {
+	if(decision){
+		const FOL_World::Decision* d = std::dynamic_pointer_cast<const FOL_World::Decision>(decision).get();
+		if ((step % 3) == 0) {
+			if (d->rule->key == "place") hValue += 20;
+			else if (d->rule->key == "pick") hValue += 5;
+			else hValue += 10;
+		}
+		else {
+			if (d->rule->key == "place") hValue += 5;
+			else if (d->rule->key == "pick") hValue += 20;
+			else hValue += 10;
+		}
+	}
+	// hValue += 0;
+	// cout << "SET COSTS: " << cost(step) << endl;
 }
 
 void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
@@ -485,6 +506,8 @@ void LGP_Node::write(ostream& os, bool recursive, bool path) const {
   os <<"\t poseCost=" <<cost(BD_pose) <<endl;
   os <<"\t seqCost=" <<cost(BD_seq) <<endl;
   os <<"\t pathCost=" <<cost(BD_path) <<endl;
+  os <<"\t heuristicValue=" <<hValue <<endl;
+  os <<"\t parent hValue=" <<parent->hValue <<endl;
   if(recursive) for(LGP_Node* n:children) n->write(os);
 }
 
