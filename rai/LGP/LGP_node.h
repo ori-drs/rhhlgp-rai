@@ -45,7 +45,7 @@ struct LGP_Node {
   Graph* folState=nullptr; ///< the symbolic state after the decision
   Node*  folDecision=nullptr; ///< the predicate in the folState that represents the decision
   Graph* folAddToState=nullptr; ///< facts that are added to the state /after/ the fol.transition, e.g., infeasibility predicates
-  uint goalHeuristic; ///< heuristic cost of node
+  double goalHeuristic; ///< heuristic cost of node
 
   //-- kinematics: the kinematic structure of the world after the decision path
   const rai::Configuration& startKinematics; ///< initial start state kinematics

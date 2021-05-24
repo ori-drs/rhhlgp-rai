@@ -7,6 +7,8 @@
 #include <LGP/LGP_tree.h>
 #include <KOMO/komo.h>
 
+void heuristic(LGP_Node *n);
+
 void generateProblem(rai::Configuration& C){
   uint numObj = 4;
   for(;;){
@@ -59,10 +61,12 @@ void solve(){
   lgp.fol.addTerminalRule("(on tray obj0) (on tray obj1) (on tray obj2)");
   lgp.displayBound = BD_seqPath;
   //lgp.verbose=2;
+	lgp.setHeuristic = heuristic;
 
-  lgp.fol.writePDDLfiles("z");
+	lgp.fol.writePDDLfiles("z");
 
   lgp.run();
+	//lgp.player();
 
   // if(lgp.verbose>1){
   //   rai::wait();
@@ -103,4 +107,22 @@ int MAIN(int argc,char **argv){
 //  testBounds();
 
   return 0;
+}
+
+void heuristic(LGP_Node *n) {
+	// if(folDecision) cout <<"FOL STATE: " << size(folState->list()).first() <<endl;
+	if(n->decision && n->parent->decision){
+		rai::String currentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(n->decision)->rule->key;
+		rai::String parentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(n->parent->decision)->rule->key;
+		if(parentDecision == "pick"){
+			if (currentDecision == "place") n->goalHeuristic += 0;
+			else if (currentDecision == "pick") n->goalHeuristic += 10;
+			else n->goalHeuristic += 5;
+		}
+		else if (parentDecision == "place"){
+			if (currentDecision == "place") n->goalHeuristic += 10;
+			else if (currentDecision == "pick") n->goalHeuristic += 0;
+			else n->goalHeuristic += 5;
+		}
+	}
 }

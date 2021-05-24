@@ -482,15 +482,12 @@ LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe, int stopOnDepth) {
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-	LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand, stopOnDepth);
-  // LGP_Node* n =  fringe_expand.popFirst();
-  // LGP_Node* n = popBestH(fringe_expand, stopOnDepth);
+	LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand, stopOnDepth);	// either use popFirst or the node with best heuristic if there is one
 
   CHECK(n, "");
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
   for(LGP_Node* ch:n->children) {
-  	// ch->setHeuristic();										// this sets the heuristic value in the node
   	if (setHeuristic) setHeuristic(ch);
     if(ch->isTerminal) {
       terminals.append(ch);
@@ -598,7 +595,7 @@ void LGP_Tree::step() {
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
   if(fringe_solved.N>numSol) {
-    if(verbose>0) cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); if(setHeuristic) cout <<" hVal: " <<fringe_solved.last()->goalHeuristic; cout <<endl;
+    if(verbose>0) { cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); if(setHeuristic) cout <<" hVal: " <<fringe_solved.last()->goalHeuristic; cout <<endl; }
     solutions.set()->append(new LGP_Tree_SolutionData(*this, fringe_solved.last()));
     solutions.set()->sort(sortComp2);
   }
