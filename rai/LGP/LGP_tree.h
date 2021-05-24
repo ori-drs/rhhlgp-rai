@@ -78,7 +78,7 @@ struct LGP_Tree : GLDrawer {
   LGP_Node* getBest(LGP_NodeL& fringe, uint level);
   LGP_Node* popBest(LGP_NodeL& fringe, uint level);
   LGP_Node* getBest() { return getBest(fringe_solved, 3); }
-  LGP_Node* popBestH(LGP_NodeL& fringe, int stopOnDepth);
+  LGP_Node* popBestH(LGP_NodeL& fringe, int stopOnDepth); 	// finds the next node to expand based on hValue
   LGP_Node* expandNext(int stopOnLevel=-1, LGP_NodeL* addIfTerminal=nullptr);
 
   void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren);
@@ -96,6 +96,7 @@ struct LGP_Tree : GLDrawer {
 
   //-- work directly on the tree
   LGP_Node* walkToNode(const rai::String& seq);
+  void (*setHeuristic)(LGP_Node *n);	// set a heuristic to use in the run loop
 
   // output
   uint numFoundSolutions();

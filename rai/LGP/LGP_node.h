@@ -45,7 +45,7 @@ struct LGP_Node {
   Graph* folState=nullptr; ///< the symbolic state after the decision
   Node*  folDecision=nullptr; ///< the predicate in the folState that represents the decision
   Graph* folAddToState=nullptr; ///< facts that are added to the state /after/ the fol.transition, e.g., infeasibility predicates
-  uint hValue; ///< heuristic cost of node
+  uint goalHeuristic; ///< heuristic cost of node
 
   //-- kinematics: the kinematic structure of the world after the decision path
   const rai::Configuration& startKinematics; ///< initial start state kinematics
@@ -84,7 +84,6 @@ struct LGP_Node {
   ptr<KOMO> optSubCG(const SubCG& scg, bool collisions, int verbose);
   ptr<CG> getCGO(bool collisions=false, int verbose=-1);
   void resetData();
-  void setHeuristic();
 
   //-- helpers to get other nodes
   LGP_NodeL getTreePath() const; ///< return the decision path in terms of a list of nodes (just walking to the root)

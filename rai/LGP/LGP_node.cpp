@@ -44,7 +44,7 @@ void LGP_Node::resetData() {
 
 LGP_Node::LGP_Node(LGP_Tree* _tree, uint levels)
   : parent(nullptr), tree(_tree), step(0), time(0.), id(COUNT_node++),
-    fol(tree->fol), hValue(0),
+    fol(tree->fol), goalHeuristic(0),
     startKinematics(tree->kin),
     L(levels) {
   //this is the root node!
@@ -58,7 +58,7 @@ LGP_Node::LGP_Node(LGP_Tree* _tree, uint levels)
 
 LGP_Node::LGP_Node(LGP_Node* parent, MCTS_Environment::Handle& a)
   : parent(parent), tree(parent->tree), step(parent->step+1), id(COUNT_node++),
-    fol(parent->fol), hValue(parent->hValue),
+    fol(parent->fol), goalHeuristic(parent->goalHeuristic),
     startKinematics(parent->startKinematics),
     L(parent->L) {
   parent->children.append(this);
@@ -100,27 +100,6 @@ void LGP_Node::expand(int verbose) {
   }
   if(!children.N) isTerminal=true;
   isExpanded=true;
-}
-
-// TODO: find some heuristic to properly set the costs here
-void LGP_Node::setHeuristic() {
-	// if(folDecision) cout <<"FOL STATE: " << size(folState->list()).first() <<endl;
-	if(decision && parent->decision){
-		rai::String currentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(decision)->rule->key;
-		rai::String parentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(parent->decision)->rule->key;
-		if(parentDecision == "pick"){
-			if (currentDecision == "place") hValue += 0;
-			else if (currentDecision == "pick") hValue += 10;
-			else hValue += 5;
-		}
-		else if (currentDecision == "place"){
-			if (currentDecision == "place") hValue += 10;
-			else if (currentDecision == "pick") hValue += 0;
-			else hValue += 5;
-		}
-	}
-	// hValue = size(folState->list()).first(); // this is working terribly
-	// cout << "H COSTS: " << hValue << endl;
 }
 
 void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
@@ -507,8 +486,8 @@ void LGP_Node::write(ostream& os, bool recursive, bool path) const {
   os <<"\t poseCost=" <<cost(BD_pose) <<endl;
   os <<"\t seqCost=" <<cost(BD_seq) <<endl;
   os <<"\t pathCost=" <<cost(BD_path) <<endl;
-  os <<"\t heuristicValue=" <<hValue <<endl;
-  os <<"\t parent hValue=" <<parent->hValue <<endl;
+  os <<"\t heuristicValue=" <<goalHeuristic <<endl;
+  os <<"\t parent hValue=" <<parent->goalHeuristic <<endl;
   if(recursive) for(LGP_Node* n:children) n->write(os);
 }
 
