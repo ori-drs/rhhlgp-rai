@@ -467,7 +467,7 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
   return best;
 }
 
-LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe, int stopOnDepth) {
+LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe) {
 	if(!fringe.N) return nullptr;
 	LGP_Node* best = nullptr;
 	for(LGP_Node* n:fringe) {
@@ -482,7 +482,8 @@ LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe, int stopOnDepth) {
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-	LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand, stopOnDepth);	// either use popFirst or the node with best heuristic if there is one
+	LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
+	// LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand);	// either use popFirst or the node with best heuristic if there is one
 
   CHECK(n, "");
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
@@ -526,7 +527,7 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
 void LGP_Tree::optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* addIfTerminal) {
   if(!fringe.N) return;
   LGP_Node* n =  fringe.popFirst();
-  // cout << "EXPANDING optFirstOnLevel: " << n << endl;
+	// cout << "EXPANDING optFirstOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
       n->optBound(bound, collisions, verbose-2);
@@ -589,13 +590,14 @@ void LGP_Tree::step() {
   uint numSol = fringe_solved.N;
 
 //  if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
-	optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
+	optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
+	// optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
   optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
   if(fringe_solved.N>numSol) {
-    if(verbose>0) { cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); if(setHeuristic) cout <<" hVal: " <<fringe_solved.last()->goalHeuristic; cout <<endl; }
+    if(verbose>0) { cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); if(setHeuristic) cout <<" hVal: " <<fringe_solved.last()->cost(BD_symbolic); cout <<endl; }
     solutions.set()->append(new LGP_Tree_SolutionData(*this, fringe_solved.last()));
     solutions.set()->sort(sortComp2);
   }
