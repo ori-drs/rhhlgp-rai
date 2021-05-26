@@ -7,7 +7,7 @@ Terminate
 FOL_World{
   hasWait=false
   gamma = 1.
-  stepCost = 1.
+  stepCost = 0.
   timeCost = 0.
 }
 

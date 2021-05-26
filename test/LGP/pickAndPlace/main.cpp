@@ -111,18 +111,19 @@ int MAIN(int argc,char **argv){
 
 void heuristic(LGP_Node *n) {
 	// if(folDecision) cout <<"FOL STATE: " << size(folState->list()).first() <<endl;
+	// cout << n->cost(BD_symbolic) <<endl;
 	if(n->decision && n->parent->decision){
 		rai::String currentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(n->decision)->rule->key;
 		rai::String parentDecision = std::dynamic_pointer_cast<const FOL_World::Decision>(n->parent->decision)->rule->key;
 		if(parentDecision == "pick"){
-			if (currentDecision == "place") n->goalHeuristic += 0;
-			else if (currentDecision == "pick") n->goalHeuristic += 10;
-			else n->goalHeuristic += 5;
+			if (currentDecision == "place") n->cost(BD_symbolic) += 0;
+			else if (currentDecision == "pick") n->cost(BD_symbolic) += 10;
+			else n->cost(BD_symbolic) += 5;
 		}
 		else if (parentDecision == "place"){
-			if (currentDecision == "place") n->goalHeuristic += 10;
-			else if (currentDecision == "pick") n->goalHeuristic += 0;
-			else n->goalHeuristic += 5;
+			if (currentDecision == "place") n->cost(BD_symbolic) += 10;
+			else if (currentDecision == "pick") n->cost(BD_symbolic) += 0;
+			else n->cost(BD_symbolic) += 5;
 		}
 	}
 }
