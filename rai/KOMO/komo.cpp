@@ -625,6 +625,15 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				// addModeSwitch({s.phase0+1., s.phase1}, SY_stable, {s.frames(0), s.frames(1)}, true);
 			} break;
 
+			case SY_walkerStep: {
+				if(k_order>=2){
+					addObjective({s.phase0, s.phase0+.2}, FS_position, {s.frames(1)}, OT_eq, {}, {0.,0.,.1}, 2, +1, +1);
+					addObjective({s.phase0+.2, s.phase0+.4}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2, +1, +1);
+				}
+				addObjective({s.phase0, s.phase0}, FS_distance, {s.frames(2), s.frames(1)}, OT_eq, {1e2});
+				addModeSwitch({s.phase0, s.phase1}, SY_stable, {s.frames(2), s.frames(1)}, true);
+			} break;
+
       case SY_contact:    addContact_slide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
       case SY_contactStick:    addContact_stick(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
       case SY_contactComplementary: addContact_ComplementarySlide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
@@ -2234,6 +2243,7 @@ template<> const char* rai::Enum<SkeletonSymbol>::names []= {
   "downUp",
   "break",
   "connectBananas",
+  "walkerStep",
 
   "contact",
   "contactStick",

@@ -54,6 +54,7 @@ enum SkeletonSymbol {
   SY_downUp, //old
   SY_break,
   SY_connectBananas,
+  SY_walkerStep,
 
   //interactions:
   SY_contact,

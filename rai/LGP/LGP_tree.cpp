@@ -247,6 +247,8 @@ void LGP_Tree::updateDisplay() {
 }
 
 void LGP_Tree::printChoices() {
+	/*focusNode->fol.verbose = 5;
+	focusNode->fol.get_actions();*/
   //-- query UI
   cout <<"********************" <<endl;
   cout <<"NODE:\n" <<*focusNode <<endl;
@@ -590,8 +592,8 @@ void LGP_Tree::step() {
   uint numSol = fringe_solved.N;
 
 //  if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
-	optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
-	// optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
+	//optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
+	optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
   optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
@@ -688,6 +690,8 @@ void LGP_Tree::run(uint steps) {
     dth->saveVideo = true;
     rai::wait(20.);
   }
+
+	rai::wait(20.);
 
   if(verbose>1) views.clear();
 }
