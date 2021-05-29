@@ -98,11 +98,6 @@ PoseBound::PoseBound(ptr<KOMO>& komo,
     }
 #endif
 
-  if(komo->verbose>1) {
-    cout <<"POSE skeleton:" <<endl;
-    writeSkeleton(cout, finalS, getSwitchesFromSkeleton(finalS, komo->world));
-  }
-
   komo->setModel(startKinematics, collisions);
   komo->setTiming(optHorizon, 1, 10., 1);
 
@@ -114,6 +109,11 @@ PoseBound::PoseBound(ptr<KOMO>& komo,
   komo->add_qControlObjective({}, 1, 1e-2);
   komo->add_qControlObjective({}, 0, 1e-2);
 #endif
+
+  if(komo->verbose>1) {
+    cout <<"POSE skeleton:" <<endl;
+    writeSkeleton(cout, finalS, getSwitchesFromSkeleton(finalS, komo->world));
+  }
 
   komo->setSkeleton(finalS);
 
