@@ -131,6 +131,7 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const char* folFileName) : LG
   root = new LGP_Node(this, BD_max);
   focusNode = root;
   setHeuristic = nullptr;
+  // oz visuals
   V.setConfiguration(kin);	// oz: remove if unnec. after merge
   if(verbose>0) V.watch("testLGP");	// oz: same as above
 }
@@ -142,6 +143,7 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_
   finalGeometryObjectives.setTiming(1., 1, 1., 1);
   root = new LGP_Node(this, BD_max);
   focusNode = root;
+  // for oz visuals
   V.setConfiguration(kin);	// oz: rem if nec
   if(verbose>0) {
     V.watch("testLGP");	// oz: rem if nec
@@ -253,6 +255,7 @@ void LGP_Tree::updateDisplay() {
 }
 
 void LGP_Tree::printChoices() {
+	// This is to debug
 	/*focusNode->fol.verbose = 5;
 	focusNode->fol.get_actions();*/
   //-- query UI
@@ -490,7 +493,7 @@ LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe) {
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-  if(setHeuristic) HALT("HEURISTIC!!!")
+  //if(setHeuristic) HALT("HEURISTIC!!!");
 	LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
 	// LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand);	// either use popFirst or the node with best heuristic if there is one
 
@@ -598,9 +601,10 @@ void LGP_Tree::step() {
 
   uint numSol = fringe_solved.N;
 
+  // TODO: here you can check around a bit
 //  if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
-	//optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
-	optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
+	optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
+	//if(rnd.uni()<.5) optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
   optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
@@ -701,8 +705,6 @@ void LGP_Tree::run(uint steps) {
     dth->saveVideo = true;
     rai::wait(20.);
   }
-
-	rai::wait(20.);
 
   if(verbose>1) views.clear();
 }

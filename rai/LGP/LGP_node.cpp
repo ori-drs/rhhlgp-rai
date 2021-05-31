@@ -85,7 +85,7 @@ LGP_Node::~LGP_Node() {
 }
 
 void LGP_Node::expand(int verbose) {
-  cout << " Expanding: " << *this << endl;
+	if (verbose > 1) cout << " Expanding: " << *this << endl;
   if(isExpanded) return; //{ LOG(-1) <<"MNode '" <<*this <<"' is already expanded"; return; }
   CHECK(!children.N, "");
   if(isTerminal) return;
@@ -95,7 +95,7 @@ void LGP_Node::expand(int verbose) {
   auto actions = fol.get_actions();
   fol.verbose=tmp;
   for(FOL_World::Handle& a:actions) {
-    cout <<"  EXPAND DECISION: " <<*a <<endl;
+    if (verbose > 1) cout <<"  EXPAND DECISION: " <<*a <<endl;
     new LGP_Node(this, a);
   }
   if(!children.N) isTerminal=true;
@@ -123,6 +123,15 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   ptr<KOMO>& komo = komoProblem(bound);
 
   komo->verbose = rai::MAX(verbose, 0);
+
+	/*const rai::Configuration& K = startKinematics;
+		for (rai::String s : {"L_handA", "R_handA", "L_handB", "R_handB", "banana", "base", "o1", "o0", "o2", "low_banana"}){
+			if (K.getFrame(s)){
+				//cout << "Parent of " << s<< " : " << K.getFrame(s)->parent->name << ", ";
+				cout << *K.getFrame(s) <<endl;
+			}
+		}
+	cout <<endl;*/
 
   if(komo->verbose>0) {
     cout <<"########## OPTIM lev " <<bound <<endl;
