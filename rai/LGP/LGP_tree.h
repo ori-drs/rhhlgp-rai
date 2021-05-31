@@ -9,6 +9,7 @@
 #pragma once
 
 #include "LGP_node.h"
+#include "../Kin/viewer.h"
 #include "../Core/thread.h"
 
 struct KinPathViewer;
@@ -48,6 +49,7 @@ struct LGP_Tree : GLDrawer {
   LGP_Node* root=0, *focusNode=0;
   FOL_World fol;
   rai::Configuration kin;
+  rai::ConfigurationViewer V;
 
   KOMO finalGeometryObjectives;
 
@@ -86,7 +88,7 @@ struct LGP_Tree : GLDrawer {
   void clearFromInfeasibles(LGP_NodeL& fringe);
 
  public:
-  void run(uint steps=10000);
+  void run(uint steps=300000);
   void init();
   void step();
   void buildTree(uint depth);

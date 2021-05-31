@@ -85,7 +85,7 @@ LGP_Node::~LGP_Node() {
 }
 
 void LGP_Node::expand(int verbose) {
-	// cout << " Expanding: " << *this << endl;
+  cout << " Expanding: " << *this << endl;
   if(isExpanded) return; //{ LOG(-1) <<"MNode '" <<*this <<"' is already expanded"; return; }
   CHECK(!children.N, "");
   if(isTerminal) return;
@@ -95,7 +95,7 @@ void LGP_Node::expand(int verbose) {
   auto actions = fol.get_actions();
   fol.verbose=tmp;
   for(FOL_World::Handle& a:actions) {
-    //    cout <<"  EXPAND DECISION: " <<*a <<endl;
+    cout <<"  EXPAND DECISION: " <<*a <<endl;
     new LGP_Node(this, a);
   }
   if(!children.N) isTerminal=true;

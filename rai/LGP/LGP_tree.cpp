@@ -131,6 +131,8 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const char* folFileName) : LG
   root = new LGP_Node(this, BD_max);
   focusNode = root;
   setHeuristic = nullptr;
+  V.setConfiguration(kin);	// oz: remove if unnec. after merge
+  if(verbose>0) V.watch("testLGP");	// oz: same as above
 }
 
 LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_Tree() {
@@ -140,7 +142,11 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_
   finalGeometryObjectives.setTiming(1., 1, 1., 1);
   root = new LGP_Node(this, BD_max);
   focusNode = root;
-  if(verbose>0) cout <<"INITIAL LOGIC STATE = " <<*root->folState <<endl;
+  V.setConfiguration(kin);	// oz: rem if nec
+  if(verbose>0) {
+    V.watch("testLGP");	// oz: rem if nec
+    cout <<"INITIAL LOGIC STATE = " <<*root->folState <<endl;
+  }
 	setHeuristic = nullptr;
 }
 
@@ -484,7 +490,8 @@ LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe) {
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-	LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
+  if(setHeuristic) HALT("HEURISTIC!!!")
+	LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
 	// LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand);	// either use popFirst or the node with best heuristic if there is one
 
   CHECK(n, "");
@@ -602,6 +609,10 @@ void LGP_Tree::step() {
     if(verbose>0) { cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); if(setHeuristic) cout <<" hVal: " <<fringe_solved.last()->cost(BD_symbolic); cout <<endl; }
     solutions.set()->append(new LGP_Tree_SolutionData(*this, fringe_solved.last()));
     solutions.set()->sort(sortComp2);
+    if(verbose>0) {
+      V.setPath(focusNode->komoProblem(BD_seqPath)->getPath_X(), "", false); // last arg: true to 'press enter'
+      while(V.playVideo(true, 3.));  //1st arg: true ->to move fwd with a keypress, last arg for saving vid: "z.vid/"
+    }
   }
 
   //-- update queues (if something got infeasible)
@@ -616,7 +627,7 @@ void LGP_Tree::step() {
     rai::String out=report();
     fil <<out <<endl;
     cout <<out <<endl;
-    if(verbose>1 && !(numSteps%1)) updateDisplay();
+//    if(verbose>1 && !(numSteps%1)) updateDisplay();
   }
   numSteps++;
 }
