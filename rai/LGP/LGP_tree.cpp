@@ -493,16 +493,14 @@ LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe) {
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-  //if(setHeuristic) HALT("HEURISTIC!!!");
 	LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
-	// LGP_Node* n = setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand);	// either use popFirst or the node with best heuristic if there is one
-
+	//LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand);	// either use popFirst or the node with best heuristic if there is one
   CHECK(n, "");
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
   for(LGP_Node* ch:n->children) {
   	if (setHeuristic) setHeuristic(ch);
-    if(ch->isTerminal) {
+		if(ch->isTerminal) {
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
       for(LGP_Node* n:path) if(!n->count(1)) fringe_poseToGoal.setAppend(n); //pose2 is a FIFO
@@ -603,8 +601,8 @@ void LGP_Tree::step() {
 
   // TODO: here you can check around a bit
 //  if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
+	if(rnd.uni()<.5) optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
 	optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
-	//if(rnd.uni()<.5) optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
   optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
@@ -668,6 +666,7 @@ void LGP_Tree::getSymbolicSolutions(uint depth) {
 }
 
 void LGP_Tree::init() {
+	if (setHeuristic) setHeuristic(root);
   fringe_expand.append(root);
   fringe_pose.append(root);
 //  if(verbose>1) {

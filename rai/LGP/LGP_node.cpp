@@ -306,6 +306,7 @@ LGP_NodeL LGP_Node::getTreePath() const {
   return path;
 }
 
+// TODO: write into here
 rai::String LGP_Node::getTreePathString(char sep) const {
   LGP_NodeL path = getTreePath();
   rai::String str;
@@ -313,6 +314,7 @@ rai::String LGP_Node::getTreePathString(char sep) const {
     if(b->decision) str <<*b->decision <<sep;
 //    else str <<"ROOT" <<sep;
   }
+  str <<cost(BD_symbolic) <<sep;
   return str;
 }
 
