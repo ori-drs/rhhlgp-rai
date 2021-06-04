@@ -620,11 +620,10 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// problem: this requires to know the shape of the walkers
-
-				// switch to stable after??
-				// addModeSwitch({s.phase0+1., s.phase1}, SY_stable, {s.frames(0), s.frames(1)}, true);
+				//addObjective({s.phase0}, FS_vectorZDiff, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 			} break;
 
+      // TODO: remove again
 			case SY_walkerStep: {
 				if(k_order>=2){
 					addObjective({s.phase0, s.phase0+.2}, FS_position, {s.frames(1)}, OT_eq, {}, {0.,0.,.1}, 2, +1, +1);

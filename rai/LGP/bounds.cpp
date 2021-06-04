@@ -26,7 +26,7 @@ template<> const char* rai::Enum<BoundType>::names []= {
   nullptr
 };
 
-rai::Array<SkeletonSymbol> modes = { SY_stable, SY_stableOn, SY_dynamic, SY_dynamicOn, SY_dynamicTrans, };
+rai::Array<SkeletonSymbol> modes = { SY_stable, SY_stableOn, SY_dynamic, SY_dynamicOn, SY_dynamicTrans, SY_connectBananas };
 
 ptr<ComputeObject> skeleton2Bound(ptr<KOMO>& komo, BoundType boundType, const Skeleton& S,
                                   const rai::Configuration& startKinematics,
@@ -130,6 +130,8 @@ PoseBound::PoseBound(ptr<KOMO>& komo,
     if(!std::dynamic_pointer_cast<F_qItself>(o->feat)
        && !std::dynamic_pointer_cast<F_Pose>(o->feat)
        && !std::dynamic_pointer_cast<F_PoseRel>(o->feat)
+       && !std::dynamic_pointer_cast<F_ScalarProduct>(o->feat)
+       && !std::dynamic_pointer_cast<F_PositionRel>(o->feat)
        && o->feat->order>0) {
       o->feat.reset();
     }
