@@ -145,16 +145,19 @@ rai::Frame* rai::KinematicSwitch::apply(FrameL& frames) {
     to = to->getUpwardLink(NoTransformation, false);
     if(to->parent) to->unLink();
 #elif 1 //THIS is the new STANDARD! (was the version that works for the crawler; works also for pnp LGP test - but not when picking link-shapes only!)
+    // TODO: this does the tree switch
+    // maybe use false here
     to->C.reconfigureRoot(to, true);
 #else
     if(to->parent) to->unLink();
 #endif
 
-    //create a new joint
+    //create a new joint -- here the order is changed
     to->setParent(from, false);
     to->setJoint(jointType);
     CHECK(jointType!=JT_none, "");
 
+    // jA and jB are transformations, if they are non 0 an artificial link is inserted
     if(!jA.isZero()) to->insertPreLink(jA);
     if(!jB.isZero()) { HALT("only to be careful: does the orgX still work?"); to->insertPostLink(jB); }
 
