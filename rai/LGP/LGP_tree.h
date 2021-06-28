@@ -77,7 +77,7 @@ struct LGP_Tree : GLDrawer {
 
   //-- methods called in the run loop
  private:
-  LGP_Node* getBest(LGP_NodeL& fringe, uint level);
+  LGP_Node* getBest(LGP_NodeL& fringe, int level);
   LGP_Node* popBest(LGP_NodeL& fringe, uint level);
   LGP_Node* getBest() { return getBest(fringe_solved, 3); }
   LGP_Node* popBestH(LGP_NodeL& fringe); 	// finds the next node to expand based on hValue

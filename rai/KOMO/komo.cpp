@@ -616,21 +616,25 @@ void KOMO::setSkeleton(const Skeleton& S) {
       case SY_break:      addObjective({s.phase0, s.phase1}, make_shared<F_NoJumpFromParent_OBSOLETE>(), {s.frames(0)}, OT_eq, {1e2}, NoArr, 1, 0, 0);  break;
 
       case SY_connectBananas: {
+      	//double effectorSize = shapeSize(world, s.frames(0), 0);
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
-				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// problem: this requires to know the shape of the walkers
+				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// TODO: use effector size
 				//addObjective({s.phase0}, FS_vectorZDiff, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 			} break;
 
-      // TODO: remove again
-			case SY_walkerStep: {
-				if(k_order>=2){
-					addObjective({s.phase0, s.phase0+.2}, FS_position, {s.frames(1)}, OT_eq, {}, {0.,0.,.1}, 2, +1, +1);
-					addObjective({s.phase0+.2, s.phase0+.4}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2, +1, +1);
-				}
-				addObjective({s.phase0, s.phase0}, FS_distance, {s.frames(2), s.frames(1)}, OT_eq, {1e2});
-				addModeSwitch({s.phase0, s.phase1}, SY_stable, {s.frames(2), s.frames(1)}, true);
+
+      // FIXE: this is not working properly yet.
+      // I tried to use it to improve the connections between objects and walkers
+			case SY_connectObject: {
+				//cout << "CONNECTED!!!" <<endl;
+				//double boxSize = 0.;//shapeSize(world, s.frames(1), 1);
+				//addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0.5, 0.});
+				//addObjective({s.phase0, s.phase1}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{0.,0.,1e2}}, {0.,0.,0.}); //arr({1,3},{0,0,1e2})
+				addObjective({s.phase0}, FS_scalarProductXY, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
+				//addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
+				//addObjective({s.phase0}, FS_scalarProductXZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
 			} break;
 
       case SY_contact:    addContact_slide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
@@ -2242,7 +2246,7 @@ template<> const char* rai::Enum<SkeletonSymbol>::names []= {
   "downUp",
   "break",
   "connectBananas",
-  "walkerStep",
+  "connectObject",
 
   "contact",
   "contactStick",

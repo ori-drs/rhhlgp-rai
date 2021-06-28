@@ -314,7 +314,7 @@ rai::String LGP_Node::getTreePathString(char sep) const {
     if(b->decision) str <<*b->decision <<sep;
 //    else str <<"ROOT" <<sep;
   }
-  str <<cost(BD_symbolic) <<sep;
+  str <<path.elem(-1)->cost(BD_symbolic) <<sep;
   return str;
 }
 

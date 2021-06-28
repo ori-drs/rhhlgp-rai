@@ -54,7 +54,7 @@ enum SkeletonSymbol {
   SY_downUp, //old
   SY_break,
   SY_connectBananas,
-  SY_walkerStep,
+  SY_connectObject,
 
   //interactions:
   SY_contact,
@@ -277,6 +277,7 @@ public:
   void setSpline(uint splineT);      ///< optimize B-spline nodes instead of the path; splineT specifies the time steps per node
 
   //-- reading results
+  // TODO: look into this
   arr getConfiguration_qAll(int t);  ///< get all DOFs
   arr getConfiguration_qOrg(int t);  ///< get only those DOFs that were defined in the original world (excluding extra DOFs from switches)
   arr getConfiguration_X(int t);     ///< get frame path for selected frames
