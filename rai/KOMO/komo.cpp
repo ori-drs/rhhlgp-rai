@@ -843,7 +843,7 @@ void KOMO::initWithWaypoints(const arrA& waypoints, uint waypointStepsPerPhase, 
     steps(i) = conv_time2step(conv_step2time(i, waypointStepsPerPhase), stepsPerPhase);
   }
 
-//  view(true, STRING("before"));
+	//view(true, STRING("before"));
 
   //first set the path piece-wise CONSTANT at waypoints and the subsequent steps (each waypoint may have different dimension!...)
 #ifndef KOMO_MIMIC_STABLE //depends on sw->isStable -> mimic !!
@@ -863,7 +863,8 @@ void KOMO::initWithWaypoints(const arrA& waypoints, uint waypointStepsPerPhase, 
 //  view(true, STRING("after"));
 
   //then interpolate w.r.t. non-switching frames within the intervals
-#if 1
+  // Cornelius: I changed this
+#if 0
   for(uint i=0; i<steps.N; i++) {
     uint i1=steps(i);
     uint i0=0; if(i) i0 = steps(i-1);

@@ -532,6 +532,21 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
       if(addIfTerminal && n->isTerminal) addIfTerminal->append(n);
       if(addChildren) for(LGP_Node* c:n->children) addChildren->append(c);
     }
+    // NEW: use path bound if seq path does not work
+    else if(bound == BD_seqPath && !n->feasible(bound)) {
+			RAI_MSG("TRYING PATH BOUND");
+			try {
+				n->optBound(BD_path, collisions, verbose-2);
+			} catch(const char* err) {
+				LOG(-1) <<"opt(level=" <<BD_path <<") has failed for the following node:";
+				n->write(cout, false, true);
+				LOG(-3) <<"node optimization failed";
+			}
+			if(n->feasible(BD_path)) {
+				if(addIfTerminal && n->isTerminal) addIfTerminal->append(n);
+				if(addChildren) for(LGP_Node* c:n->children) addChildren->append(c);
+			}
+    }
     focusNode = n;
   }
 }
@@ -605,7 +620,7 @@ void LGP_Tree::step() {
 	//if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
 	//if(rnd.uni()<.5) optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
 	optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
-	// NEW: skip pose bound
+	// NEW: skip pose bound?
   optBestOnLevel(BD_seq, fringe_seq, BD_symbolic, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);

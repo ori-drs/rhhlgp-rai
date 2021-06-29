@@ -214,7 +214,8 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
     cost_here = komo->sos;
     constraints_here = komo->ineq + komo->eq;
   }
-  bool feas = (constraints_here<1.);
+  // TODO: try to use different values here (less than 3,4,5)
+  bool feas = (constraints_here<2.5);
 
   if(komo->verbose>0) {
     cout <<"  RESULTS: cost: " <<cost_here <<" constraints: " <<constraints_here <<" feasible: " <<feas <<endl;
