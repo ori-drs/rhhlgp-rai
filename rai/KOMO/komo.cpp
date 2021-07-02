@@ -550,7 +550,7 @@ void KOMO::setSkeleton(const Skeleton& S) {
         break;
       }
       case SY_topBoxPlace: {
-        addObjective({s.phase0}, FS_positionDiff, {s.frames(1), s.frames(2)}, OT_eq, {1e2}, {0,0,.08}); //arr({1,3},{0,0,1e2})
+        //addObjective({s.phase0}, FS_positionDiff, {s.frames(1), s.frames(2)}, OT_eq, {1e2}, {0,0,.08}); //arr({1,3},{0,0,1e2})
         addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
         //slow - down - up
         if(k_order>=2){
@@ -615,6 +615,7 @@ void KOMO::setSkeleton(const Skeleton& S) {
 
       case SY_break:      addObjective({s.phase0, s.phase1}, make_shared<F_NoJumpFromParent_OBSOLETE>(), {s.frames(0)}, OT_eq, {1e2}, NoArr, 1, 0, 0);  break;
 
+    	// maybe use OT_sos on this to avoid local minima
       case SY_connectBananas: {
       	//double effectorSize = shapeSize(world, s.frames(0), 0);
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
@@ -622,10 +623,16 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., .12});		// TODO: use effector size
 				//addObjective({s.phase0}, FS_vectorZDiff, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
+
+				// up down before connecting -- maybe take it away again
+				/*if(k_order>=2){
+					addObjective({s.phase0-.1,s.phase0}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2);
+					addObjective({s.phase0-.1,s.phase0}, FS_position, {s.frames(1)}, OT_eq, {}, {0.,0.,.1}, 2);
+				}*/
 			} break;
 
 
-      // FIXE: this is not working properly yet.
+      // FIXME: this is not working properly yet.
       // I tried to use it to improve the connections between objects and walkers
 			case SY_connectObject: {
 				//cout << "CONNECTED!!!" <<endl;
@@ -744,6 +751,7 @@ void KOMO::setConfiguration_qAll(int t, const arr& q) {
   pathConfig.setJointState(q, pathConfig.getJointsSlice(timeSlices[k_order+t], false));
 }
 
+// TODO: these can be used for receding horizon control
 arr KOMO::getConfiguration_qAll(int t) {
   return pathConfig.getJointState(pathConfig.getJointsSlice(timeSlices[k_order+t], false));
 }
@@ -863,7 +871,7 @@ void KOMO::initWithWaypoints(const arrA& waypoints, uint waypointStepsPerPhase, 
 //  view(true, STRING("after"));
 
   //then interpolate w.r.t. non-switching frames within the intervals
-  // Cornelius: I changed this
+  // Cornelius: I changed this to 0 from 1
 #if 0
   for(uint i=0; i<steps.N; i++) {
     uint i1=steps(i);

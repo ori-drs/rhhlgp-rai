@@ -503,14 +503,14 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
 		if(ch->isTerminal) {
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
-			// NEW: skip pose bound and add to fringe seq directly
-			for(LGP_Node* n:path) if(!n->count(1)) fringe_poseToGoal.setAppend(n); //pose2 is a FIFO
+			// NEW: skip pose bound and add to fringe seq directly, was fringe_poseToGoal
+			for(LGP_Node* n:path) if(!n->count(1)) fringe_seq.setAppend(n); //pose2 is a FIFO
     } else {
       fringe_expand.append(ch);
     }
-		// NEW: skip pose bound and add to fringe seq
+		// NEW: skip pose bound and add to fringe seq; was fringe pose
 		if(addIfTerminal && ch->isTerminal) addIfTerminal->append(ch);
-    if(n->count(1)) fringe_pose.append(ch);
+    if(n->count(1)) fringe_seq.append(ch);
   }
   return n;
 }
@@ -619,9 +619,10 @@ void LGP_Tree::step() {
   // TODO: here you can check around a bit
 	//if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
 	//if(rnd.uni()<.5) optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
-	optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
 	// NEW: skip pose bound?
-  optBestOnLevel(BD_seq, fringe_seq, BD_symbolic, &fringe_path, nullptr);
+	//optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
+	//optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
+	optBestOnLevel(BD_seq, fringe_seq, BD_symbolic, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
@@ -687,8 +688,8 @@ void LGP_Tree::init() {
 	if (setHeuristic) setHeuristic(root);
   fringe_expand.append(root);
   // NEW: skipping poseBound
-  fringe_pose.append(root);
-  //fringe_seq.append(root);
+  //fringe_pose.append(root);
+  fringe_seq.append(root);
 //  if(verbose>1) {
 //    initDisplay();
 //    updateDisplay();

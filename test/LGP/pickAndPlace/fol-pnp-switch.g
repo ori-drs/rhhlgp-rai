@@ -58,7 +58,7 @@ DecisionRule pick {
 
 DecisionRule place {
   X, Y, Z,
-  { (picked X Y) (table Z) (held Y) }
+  { (picked X Y) (tray Z) (held Y) }
   { (picked X Y)! (busy X)! (busy Y)! (held Y)! # logic only
     (stable ANY Y)! (touch X Y)! # NLP predicates
     (on Z Y) (above Y Z) (stableOn Z Y) tmp(touch X Y) tmp(touch Y Z)

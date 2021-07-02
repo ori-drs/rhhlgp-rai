@@ -117,21 +117,20 @@ void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
   new LGP_Node(this, action);
 }
 
+// this is to get the endconfiguration of the previous komo instance
+const rai::Configuration& LGP_Node::getEndConfig(BoundType bound) {
+	if(parent->komoProblem(bound)) {cout << "SUCCESS!" <<endl; return parent->komoProblem(bound)->pathConfig;}
+	else return startKinematics;
+}
+
 void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   if(komoProblem(bound)) komoProblem(bound).reset();
   komoProblem(bound) = make_shared<KOMO>();
   ptr<KOMO>& komo = komoProblem(bound);
+	/*ptr<KOMO> komo = make_shared<KOMO>();
+	komoProblem(bound) = komo;*/
 
   komo->verbose = rai::MAX(verbose, 0);
-
-	/*const rai::Configuration& K = startKinematics;
-		for (rai::String s : {"L_handA", "R_handA", "L_handB", "R_handB", "banana", "base", "o1", "o0", "o2", "low_banana"}){
-			if (K.getFrame(s)){
-				//cout << "Parent of " << s<< " : " << K.getFrame(s)->parent->name << ", ";
-				cout << *K.getFrame(s) <<endl;
-			}
-		}
-	cout <<endl;*/
 
   if(komo->verbose>0) {
     cout <<"########## OPTIM lev " <<bound <<endl;
@@ -147,10 +146,26 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
     waypoints = komoProblem(BD_seq)->getPath_qAll();
   }
 
+  // NEW: receding horizon control
+  // TODO: get just use one single action as a skeleton and add it to the
+  //const rai::Configuration& kinematics = getEndConfig(bound);
+
   auto comp = skeleton2Bound(komo, bound, S,
                              startKinematics,
                              collisions,
                              waypoints);
+
+  /*rai::Configuration lastConfig = getEndConfig(bound);
+	if (bound == BD_seq && parent) {
+		cout << "ON SEQ BOUND" <<endl;
+		if (parent->feasible(bound)) cout <<"PARENT SOLVED" <<endl;
+		//CHECK(parent->komoProblem(BD_seq), "BD_seq needs to be computed before");
+	}
+
+	auto comp = skeleton2Bound(komo, bound, S,
+														 lastConfig,
+														 collisions,
+														 waypoints);*/
 
   CHECK(comp, "no compute object returned");
 

@@ -49,6 +49,7 @@ struct LGP_Node {
 
   //-- kinematics: the kinematic structure of the world after the decision path
   const rai::Configuration& startKinematics; ///< initial start state kinematics
+	//rai::Configuration& endKinematics;
 
   bool isExpanded=false;
   bool isInfeasible=false;
@@ -65,6 +66,7 @@ struct LGP_Node {
 
   rai::Array<std::shared_ptr<KOMO>> komoProblem; //komo problems for all levels
   arrA opt; //these are the optima (trajectories) computed
+  //rai::Configuration &parentSeqKomo;
 
   // display helpers
   rai::String note;
@@ -80,6 +82,7 @@ struct LGP_Node {
   //- computations on the node
   void expand(int verbose=0);           ///< expand this node (symbolically: compute possible decisions and add their effect nodes)
   void expandSingleChild(Node *actionLiteral, int verbose=0);
+  const rai::Configuration& getEndConfig(BoundType bound);
   void optBound(BoundType bound, bool collisions=false, int verbose=-1);
   ptr<KOMO> optSubCG(const SubCG& scg, bool collisions, int verbose);
   ptr<CG> getCGO(bool collisions=false, int verbose=-1);
