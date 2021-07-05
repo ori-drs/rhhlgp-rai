@@ -540,7 +540,6 @@ void KOMO::setSkeleton(const Skeleton& S) {
 
       case SY_topBoxGrasp: {
       	// TODO: find right way to adjust position difference without collision at the base
-        //addObjective({s.phase0}, FS_positionDiff, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0., 0., 0.04});
         addObjective({s.phase0}, FS_positionDiff, s.frames, OT_eq, {1e2});
         addObjective({s.phase0}, FS_scalarProductXX, s.frames, OT_eq, {1e2}, {0.});
         addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
@@ -566,9 +565,10 @@ void KOMO::setSkeleton(const Skeleton& S) {
 //        rai::Frame* box = world.getFrame(s.frames(1));
 //        CHECK(box, "");
 //        CHECK(box->shape && box->shape->type()==rai::ST_ssBox, "");
-        double boxSize = shapeSize(world, s.frames(1), 0);
-        addObjective({s.phase0}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{1e2,.0,.0}}, {.5*boxSize,0.,0.}); //arr({1,3},{0,0,1e2})
-        addObjective({s.phase0}, FS_scalarProductXZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {1.});
+        //double boxSize = shapeSize(world, s.frames(1), 0);
+				addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2});
+				addObjective({s.phase0}, FS_scalarProductXZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
+				addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_sos, {1e2}, {0., 0., 1.});
 //        addObjective({s.phase0}, FS_scalarProductYZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2});
         break;
       }
@@ -599,7 +599,7 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				/* FIXED: This is working now */
 				double boxSize = shapeSize(world, s.frames(1), 1);
 				addObjective({s.phase0}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{1e2,.0,.0}}, {.5*boxSize,0.,0.}); //arr({1,3},{0,0,1e2})
-				addObjective({s.phase0}, FS_scalarProductXY, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {1.});
+				addObjective({s.phase0}, FS_scalarProductZZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {1.});
 				break;
       }
 
@@ -617,27 +617,22 @@ void KOMO::setSkeleton(const Skeleton& S) {
 
       case SY_break:      addObjective({s.phase0, s.phase1}, make_shared<F_NoJumpFromParent_OBSOLETE>(), {s.frames(0)}, OT_eq, {1e2}, NoArr, 1, 0, 0);  break;
 
-    	// maybe use OT_sos on this to avoid local minima
+    	// connect two crawler robots -- align coord. systems and make z-axes oppose
       case SY_connectBananas: {
-      	//double effectorSize = shapeSize(world, s.frames(0), 0);
-				/*addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
-				addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
-				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});*/
+				double effectorSize = shapeSize(world, s.frames(0), 0);
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.}); // maybe drop this
+				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductZZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2},{-1.});
-				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., -.12});		// TODO: use effector size
-
-				// up down before connecting -- maybe take it away again
-				/*if(k_order>=2){
-					addObjective({s.phase0-.1,s.phase0}, FS_position, {s.frames(0)}, OT_eq, {}, {1.,0.,0.}, 2);
-					addObjective({s.phase0-.1,s.phase0}, FS_position, {s.frames(1)}, OT_eq, {}, {1.,0.,0.}, 2);
-				}*/
+				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., -effectorSize});		// negative dist because z-axis is flipped for crawlers
+				//addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., -.12});		// TODO: use effector size
 			} break;
 
 
-      // FIXME: this is not working properly yet.
+      // FIXME: this is not working properly yet. -- maybe use oppose?
       // I tried to use it to improve the connections between objects and walkers
 			case SY_connectObject: {
+				double boxSize = shapeSize(world, "L_handA", 0);
+				cout << "SHAPE SIZE: "<< boxSize << endl;
 				//cout << "CONNECTED!!!" <<endl;
 				//double boxSize = 0.;//shapeSize(world, s.frames(1), 1);
 				//addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0.5, 0.});

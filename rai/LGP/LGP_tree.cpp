@@ -478,23 +478,11 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
   return best;
 }
 
-LGP_Node* LGP_Tree::popBestH(LGP_NodeL& fringe) {
-	if(!fringe.N) return nullptr;
-	LGP_Node* best = nullptr;
-	for(LGP_Node* n:fringe) {
-		if (n->isInfeasible) continue;
-		if(!best || (n->goalHeuristic < best->goalHeuristic)) best=n;
-	}
-	if(!best) return nullptr;
-	fringe.removeValue(best);
-	return best;
-}
 
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
 	LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
-	//LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBestH(fringe_expand);	// either use popFirst or the node with best heuristic if there is one
   CHECK(n, "");
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
