@@ -104,7 +104,7 @@ void LGP_Node::expand(int verbose) {
 
 void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
   if(isExpanded) return; //{ LOG(-1) <<"MNode '" <<*this <<"' is already expanded"; return; }
-  CHECK(!children.N,"don't expand children one bz one??");
+  CHECK(!children.N,"don't expand children one by one??");
   CHECK(!isTerminal, "cant expand terminal");
 
   fol.setState(folState, step);
@@ -127,8 +127,6 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   if(komoProblem(bound)) komoProblem(bound).reset();
   komoProblem(bound) = make_shared<KOMO>();
   ptr<KOMO>& komo = komoProblem(bound);
-	/*ptr<KOMO> komo = make_shared<KOMO>();
-	komoProblem(bound) = komo;*/
 
   komo->verbose = rai::MAX(verbose, 0);
 
@@ -146,26 +144,10 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
     waypoints = komoProblem(BD_seq)->getPath_qAll();
   }
 
-  // NEW: receding horizon control
-  // TODO: get just use one single action as a skeleton and add it to the
-  //const rai::Configuration& kinematics = getEndConfig(bound);
-
   auto comp = skeleton2Bound(komo, bound, S,
                              startKinematics,
                              collisions,
                              waypoints);
-
-  /*rai::Configuration lastConfig = getEndConfig(bound);
-	if (bound == BD_seq && parent) {
-		cout << "ON SEQ BOUND" <<endl;
-		if (parent->feasible(bound)) cout <<"PARENT SOLVED" <<endl;
-		//CHECK(parent->komoProblem(BD_seq), "BD_seq needs to be computed before");
-	}
-
-	auto comp = skeleton2Bound(komo, bound, S,
-														 lastConfig,
-														 collisions,
-														 waypoints);*/
 
   CHECK(comp, "no compute object returned");
 

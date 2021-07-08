@@ -478,7 +478,6 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
   return best;
 }
 
-
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");

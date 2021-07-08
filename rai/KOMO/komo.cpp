@@ -631,15 +631,13 @@ void KOMO::setSkeleton(const Skeleton& S) {
       // FIXME: this is not working properly yet. -- maybe use oppose?
       // I tried to use it to improve the connections between objects and walkers
 			case SY_connectObject: {
-				double boxSize = shapeSize(world, "L_handA", 0);
-				cout << "SHAPE SIZE: "<< boxSize << endl;
-				//cout << "CONNECTED!!!" <<endl;
 				//double boxSize = 0.;//shapeSize(world, s.frames(1), 1);
 				//addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0.5, 0.});
 				//addObjective({s.phase0, s.phase1}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{0.,0.,1e2}}, {0.,0.,0.}); //arr({1,3},{0,0,1e2})
-				addObjective({s.phase0}, FS_scalarProductXY, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
+				//addObjective({s.phase0}, FS_scalarProductXY, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
 				//addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				//addObjective({s.phase0}, FS_scalarProductXZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
+				addObjective({s.phase0, s.phase1}, FS_scalarProductZZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2},{-1.});
 			} break;
 
       case SY_contact:    addContact_slide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
