@@ -495,8 +495,6 @@ void LGP_Node::write(ostream& os, bool recursive, bool path) const {
   os <<"\t poseCost=" <<cost(BD_pose) <<endl;
   os <<"\t seqCost=" <<cost(BD_seq) <<endl;
   os <<"\t pathCost=" <<cost(BD_path) <<endl;
-  // os <<"\t heuristicValue=" <<goalHeuristic <<endl;
-  // os <<"\t parent hValue=" <<parent->goalHeuristic <<endl;
   if(recursive) for(LGP_Node* n:children) n->write(os);
 }
 

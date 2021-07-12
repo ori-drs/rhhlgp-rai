@@ -578,7 +578,8 @@ rai::String LGP_Tree::report(bool detailed) {
       <<" bestPose= " <<(bpose?bpose->cost(1):100.)
       <<" bestSeq= " <<(bseq ?bseq ->cost(2):100.)
       <<" bestPath= " <<(bpath?bpath->cost(displayBound):100.)
-      <<" #solutions= " <<fringe_solved.N;
+      <<" #solutions= " <<fringe_solved.N
+      <<" EXPANDED= " <<numSteps;
 
   //  if(bseq) displayFocus=bseq;
   //  if(bpath) displayFocus=bpath;
@@ -614,7 +615,7 @@ void LGP_Tree::step() {
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
   if(fringe_solved.N>numSol) {
-    if(verbose>0) { cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); if(setHeuristic) cout <<" hVal: " <<fringe_solved.last()->cost(BD_symbolic); cout <<endl; }
+    if(verbose>0) { cout <<"NEW SOLUTION FOUND! " <<fringe_solved.last()->getTreePathString(); cout <<"LEN: " <<fringe_solved.last()->step; cout <<endl; }
     solutions.set()->append(new LGP_Tree_SolutionData(*this, fringe_solved.last()));
     solutions.set()->sort(sortComp2);
     if(verbose>0) {
