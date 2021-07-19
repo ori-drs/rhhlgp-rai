@@ -145,8 +145,6 @@ rai::Frame* rai::KinematicSwitch::apply(FrameL& frames) {
     to = to->getUpwardLink(NoTransformation, false);
     if(to->parent) to->unLink();
 #elif 1 //THIS is the new STANDARD! (was the version that works for the crawler; works also for pnp LGP test - but not when picking link-shapes only!)
-    // TODO: this does the tree switch
-    // maybe use false here
     to->C.reconfigureRoot(to, true);
 #else
     if(to->parent) to->unLink();

@@ -117,12 +117,6 @@ void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
   new LGP_Node(this, action);
 }
 
-// this is to get the endconfiguration of the previous komo instance
-const rai::Configuration& LGP_Node::getEndConfig(BoundType bound) {
-	if(parent->komoProblem(bound)) {cout << "SUCCESS!" <<endl; return parent->komoProblem(bound)->pathConfig;}
-	else return startKinematics;
-}
-
 void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   if(komoProblem(bound)) komoProblem(bound).reset();
   komoProblem(bound) = make_shared<KOMO>();

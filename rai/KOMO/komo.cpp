@@ -747,7 +747,6 @@ void KOMO::setConfiguration_qAll(int t, const arr& q) {
   pathConfig.setJointState(q, pathConfig.getJointsSlice(timeSlices[k_order+t], false));
 }
 
-// TODO: these can be used for receding horizon control
 arr KOMO::getConfiguration_qAll(int t) {
   return pathConfig.getJointState(pathConfig.getJointsSlice(timeSlices[k_order+t], false));
 }

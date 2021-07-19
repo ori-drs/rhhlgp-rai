@@ -497,7 +497,7 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
     }
 		// NEW: skip pose bound and add to fringe seq; was fringe pose
 		if(addIfTerminal && ch->isTerminal) addIfTerminal->append(ch);
-    if(n->count(1)) fringe_seq.append(ch);
+    //if(n->count(1)) fringe_seq.append(ch);
   }
   return n;
 }
