@@ -117,6 +117,194 @@ void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
   new LGP_Node(this, action);
 }
 
+//===========================================================================
+// splits a skeleton into slices of the given size (apart from the last one if there are remaining entries)
+rai::Array<Skeleton> splitSkeleton(Skeleton skeleton, int sliceSize=4) {
+	Skeleton initS;
+	rai::Array<Skeleton> array = { initS };
+	int sliceN = 0;
+	for (SkeletonEntry e : skeleton) {
+		if (e.phase0 > (sliceN+1)*sliceSize) {
+			Skeleton nextSkeleton;
+			// add the overlapping entries to the next skeleton
+			// maybe there is a better way to do this in the future
+			for (SkeletonEntry entry : array.elem(sliceN)) {
+				if (entry.phase1 == -1) {
+					SkeletonEntry ecpy = SkeletonEntry(0, 1, entry.symbol, entry.frames);
+					nextSkeleton.append(ecpy);
+				}
+			}
+			array.append(nextSkeleton);
+			sliceN++;
+		}
+		// truncate the modes that are too long and append to array
+		e.phase0 -= sliceN*sliceSize;
+		e.phase1 -= sliceN*sliceSize;
+		if (e.phase1 > (sliceN+1)*sliceSize || e.phase1 < 0) e.phase1 = -1;
+		array.elem(sliceN).append(e);
+	}
+	return array;
+}
+
+//===========================================================================
+// set the new configuration in C
+void LGP_Node::getEndConfig(rai::Configuration &C, shared_ptr<KOMO> komo) {
+	const FrameL F = komo->timeSlices[komo->k_order+komo->T-1];
+	C.addCopies(F, C.forces);		//< forces is empty in our scenarios
+}
+
+//===========================================================================
+// increment costs and collisions
+void LGP_Node::getStats(BoundType bound, shared_ptr<KOMO> komo, double *cost_here, double *constraints_here) {
+	Graph result = komo->getReport((komo->verbose>0 && bound>=2));
+	DEBUG(FILE("z.problem.cost") <<result;);
+	*cost_here += result.get<double>("sos");
+	*constraints_here += result.get<double>("eq");
+	*constraints_here += result.get<double>("ineq");
+}
+
+//===========================================================================
+// run komo for a given setting
+void LGP_Node::solveBound(BoundType bound, Skeleton S, shared_ptr<KOMO> komo, const rai::Configuration &kinematics, bool collisions) {
+	arrA waypoints;
+	auto comp = skeleton2Bound(komo, bound, S,
+														 kinematics,
+														 collisions,
+														 waypoints);
+
+	CHECK(comp, "no compute object returned");
+
+	if(komo->logFile) writeSkeleton(*komo->logFile, S, getSwitchesFromSkeleton(S, komo->world));
+	if(komo->verbose>1) {
+		writeSkeleton(cout, S, getSwitchesFromSkeleton(S, komo->world));
+	}
+
+	computes.append(comp);
+
+	// write to logfile
+	if(komo->logFile) {
+		komo->reportProblem(*komo->logFile);
+		(*komo->logFile) <<komo->getProblemGraph(false);
+	}
+
+	//-- optimize
+	DEBUG(FILE("z.fol") <<fol;);
+	DEBUG(komo->getReport(false, 1, FILE("z.problem")););
+	if(komo->verbose>1) komo->reportProblem();
+	if(komo->verbose>5) komo->animateOptimization = komo->verbose-5;
+
+	try {
+		if(bound != BD_poseFromSeq) {
+			komo->run();
+		} else {
+			CHECK_EQ(step, komo->T-1, "");
+			NIY//komo->run_sub({komo->T-2}, {});
+		}
+	} catch(std::runtime_error& err) {
+		cout <<"KOMO CRASHED: " <<err.what() <<endl;
+		komoProblem(bound).reset();
+		return;
+	}
+}
+
+//===========================================================================
+// this is the RHC version of optBound
+void LGP_Node::optBound2(BoundType bound, bool collisions, int verbose) {
+	if(komoProblem(bound)) komoProblem(bound).reset();
+	komoProblem(bound) = make_shared<KOMO>();
+	ptr<KOMO>& komo = komoProblem(bound);
+
+	// use old implementation for BD_seq
+	if (bound==BD_seqPath || bound==BD_seqVelPath) {
+		bound = BD_path;
+		this->optBound(bound,collisions,verbose);
+		return;
+	}
+
+	// other bounds
+	komo->verbose = rai::MAX(verbose, 0);
+
+	if(komo->verbose>0) {
+		cout <<"########## OPTIM lev " <<bound <<endl;
+	}
+
+	komo->logFile = new ofstream(OptLGPDataPath + STRING("komo-" <<id <<'-' <<step <<'-' <<bound));
+
+	Skeleton S = getSkeleton();
+
+	// TODO: sliceSize is possibly the most important hyperparam
+	rai::Array<Skeleton> skeletonA = splitSkeleton(S, 8);
+
+	// vars to keep track of metrics
+	int count_opt = 0; double time_count = 0.; double constraints_here = 0.; double cost_here = 0.;
+
+	// optimization loop
+	komo = make_shared<KOMO>();
+	komo->verbose = verbose;
+	solveBound(bound, skeletonA.elem(0), komo, startKinematics, false);		//< optimize the first chunk to get initial komo problem
+	getStats(bound, komo, &cost_here, &constraints_here);
+	count_opt++;
+	time_count += komo->timeTotal;
+	for (int i=1; i < skeletonA.N; ++i) {
+		// get endconfig
+		rai::Configuration nextConfig;
+		getEndConfig(nextConfig, komo);
+		komo = make_shared<KOMO>();
+		komo->verbose = verbose;
+		solveBound(bound, skeletonA.elem(i), komo, nextConfig, false);
+
+		// get stats
+		getStats(bound, komo, &cost_here, &constraints_here);
+		count_opt++;
+		time_count += komo->timeTotal;
+
+		// stop if infeasible
+		if (constraints_here > 2.5) {
+			cout << "INFEASBIBLE SUBSEQ" << endl;
+			break;
+		}
+	}
+
+	COUNT_kin += rai::Configuration::setJointStateCount;
+	COUNT_opt(bound)+=count_opt;
+	//COUNT_time += komo->timeTotal;
+	count(bound)++;
+
+	DEBUG(komo->getReport(false, 1, FILE("z.problem")););
+
+	// TODO: try to use different values here (less than 3,4,5)
+	bool feas = (constraints_here<2.5);
+
+	if(komo->verbose>0) {
+		cout <<"  RESULTS: cost: " <<cost_here <<" constraints: " <<constraints_here <<" feasible: " <<feas <<endl;
+	}
+
+	//-- post process komo problem for level==1
+	if(bound==BD_pose) {
+		cost_here -= 0.1*ret.reward; //account for the symbolic costs
+		if(parent) cost_here += parent->cost(bound); //this is sequentially additive cost
+	} /*else {
+		cost_here += cost(BD_symbolic); //account for the symbolic costs
+	}*/
+
+	//-- read out and update bound
+	//update the bound
+	if(feas) {
+		if(count(bound)==1/*&& count({2,-1})==0 (also no higher levels)*/ || cost_here<highestBound) highestBound=cost_here;
+	}
+
+	if(count(bound)==1 || cost_here<cost(bound)) {
+		cost(bound) = cost_here;
+		constraints(bound) = constraints_here;
+		feasible(bound) = feas;
+		opt(bound) = komo->x;
+		computeTime(bound) = komo->timeTotal;
+	}
+
+	if(!feasible(bound))
+		labelInfeasible();
+}
+
 void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   if(komoProblem(bound)) komoProblem(bound).reset();
   komoProblem(bound) = make_shared<KOMO>();
@@ -216,9 +404,9 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   if(bound==BD_pose) {
     cost_here -= 0.1*ret.reward; //account for the symbolic costs
     if(parent) cost_here += parent->cost(bound); //this is sequentially additive cost
-  } else {
+  } /*else {
     cost_here += cost(BD_symbolic); //account for the symbolic costs
-  }
+  }*/
 
   //-- read out and update bound
   //update the bound

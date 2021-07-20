@@ -82,7 +82,10 @@ struct LGP_Node {
   //- computations on the node
   void expand(int verbose=0);           ///< expand this node (symbolically: compute possible decisions and add their effect nodes)
   void expandSingleChild(Node *actionLiteral, int verbose=0);
-  const rai::Configuration& getEndConfig(BoundType bound);
+  void getEndConfig(rai::Configuration &C, shared_ptr<KOMO> komo);
+	void getStats(BoundType bound, shared_ptr<KOMO> komo, double *cost_here, double *constraints_here);
+  void solveBound(BoundType bound, Skeleton S, shared_ptr<KOMO> komo, const rai::Configuration &kinematics, bool collisions);
+  void optBound2(BoundType bound, bool collisions, int verbose);
   void optBound(BoundType bound, bool collisions=false, int verbose=-1);
   ptr<KOMO> optSubCG(const SubCG& scg, bool collisions, int verbose);
   ptr<CG> getCGO(bool collisions=false, int verbose=-1);

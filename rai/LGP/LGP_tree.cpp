@@ -491,6 +491,7 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
 			// NEW: skip pose bound and add to fringe seq directly, was fringe_poseToGoal
+			// TODO: ask Oz why we add every node on the path here??
 			for(LGP_Node* n:path) if(!n->count(1)) fringe_seq.setAppend(n); //pose2 is a FIFO
     } else {
       fringe_expand.append(ch);
@@ -508,6 +509,8 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
   // cout << "EXPANDING optBestOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
+    	// optBound is the classic and unchanged implementation
+			//n->optBound2(bound, collisions, verbose-2);
       n->optBound(bound, collisions, verbose-2);
     } catch(const char* err) {
       LOG(-1) <<"opt(level=" <<bound <<") has failed for the following node:";
