@@ -510,7 +510,6 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
   if(n && !n->count(bound)) {
     try {
     	// optBound is the classic and unchanged implementation
-			//n->optBound2(bound, collisions, verbose-2);
       n->optBound(bound, collisions, verbose-2);
     } catch(const char* err) {
       LOG(-1) <<"opt(level=" <<bound <<") has failed for the following node:";
@@ -718,6 +717,39 @@ void LGP_Tree::run(uint steps) {
   }
 
   if(verbose>1) views.clear();
+}
+
+void LGP_Tree::run2(uint horizon, uint steps) {
+	init();
+
+	uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
+	double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
+
+	for(uint k=0; k<steps; k++) {
+		step(horizon);
+
+		if(fringe_solved.N>=stopSol) break;
+		if(COUNT_time>stopTime) break;
+	}
+
+	if(verbose>0) report(true);
+
+	//basic output
+	ofstream output(dataPath+"lgpopt");
+	writeNodeList(output);
+	output.close();
+
+	//this generates the movie!
+	if(verbose>3) {
+		//    renderToVideo();
+		rai::system(STRING("mkdir -p " <<OptLGPDataPath <<"vid"));
+		rai::system(STRING("rm -f " <<OptLGPDataPath <<"vid/*.ppm"));
+		dth->resetSteppings();
+		dth->saveVideo = true;
+		rai::wait(20.);
+	}
+
+	if(verbose>1) views.clear();
 }
 
 LGP_Tree_SolutionData::LGP_Tree_SolutionData(LGP_Tree& _tree, LGP_Node* _node) : tree(_tree), node(_node) {

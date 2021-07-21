@@ -82,10 +82,6 @@ struct LGP_Node {
   //- computations on the node
   void expand(int verbose=0);           ///< expand this node (symbolically: compute possible decisions and add their effect nodes)
   void expandSingleChild(Node *actionLiteral, int verbose=0);
-  void getEndConfig(rai::Configuration &C, shared_ptr<KOMO> komo);
-	void getStats(BoundType bound, shared_ptr<KOMO> komo, double *cost_here, double *constraints_here);
-  void solveBound(BoundType bound, Skeleton S, shared_ptr<KOMO> komo, const rai::Configuration &kinematics, bool collisions);
-  void optBound2(BoundType bound, bool collisions, int verbose);
   void optBound(BoundType bound, bool collisions=false, int verbose=-1);
   ptr<KOMO> optSubCG(const SubCG& scg, bool collisions, int verbose);
   ptr<CG> getCGO(bool collisions=false, int verbose=-1);
@@ -94,6 +90,7 @@ struct LGP_Node {
   //-- helpers to get other nodes
   LGP_NodeL getTreePath() const; ///< return the decision path in terms of a list of nodes (just walking to the root)
   rai::String getTreePathString(char sep=' ') const;
+	rai::String getTreePathString(uint horizon, char sep=' ') const;
   LGP_Node* getRoot(); ///< return the decision path in terms of a list of nodes (just walking to the root)
   LGP_Node* getChildByAction(Node*  folDecision); ///<
   void getAll(LGP_NodeL& L);
@@ -101,6 +98,12 @@ struct LGP_Node {
   void checkConsistency();
 
   Skeleton getSkeleton(bool finalStateOnly=false) const;
+  Skeleton getSkeleton(bool finalStateOnly, uint horizon) const;
+
+  // RHC functionalities
+	void solveBound(BoundType bound, Skeleton S, shared_ptr<KOMO> komo, const rai::Configuration &kinematics, bool collisions);
+	rai::Configuration optBound2(BoundType bound, bool collisions, int verbose=-1);
+	void optBound3(BoundType bound, bool collisions, uint horizon, Skeleton previousSkeleton, int verbose=-1);
  private:
   void setInfeasible(); ///< set this and all children infeasible
   void labelInfeasible(); ///< sets this infeasible AND propagates this label up-down to others

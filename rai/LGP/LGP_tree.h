@@ -83,13 +83,16 @@ struct LGP_Tree : GLDrawer {
   LGP_Node* expandNext(int stopOnLevel=-1, LGP_NodeL* addIfTerminal=nullptr);
 
   void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren);
+  void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren, uint horizon);
   void optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* addIfTerminal);
   void clearFromInfeasibles(LGP_NodeL& fringe);
 
  public:
   void run(uint steps=300000);
+  void run2(uint horizon=1000, uint steps=300000);
   void init();
   void step();
+	void step(uint horizon);
   void buildTree(uint depth);
   void getSymbolicSolutions(uint depth);
   void optFixedSequence(const rai::String& seq, BoundType specificBound=BD_all, bool collisions=false);
@@ -119,6 +122,10 @@ struct LGP_Tree : GLDrawer {
   //-- inspection and debugging
   void inspectSequence(const rai::String& seq);
   void player(StringA cmds= {});
+
+  //-- RHC stuff
+	rai::Configuration run2(uint steps);
+	Skeleton oldSkeleton;
 };
 
 struct LGP_Tree_Thread : LGP_Tree, Thread {
