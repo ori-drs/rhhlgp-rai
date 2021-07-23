@@ -125,12 +125,14 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const char* folFileName) : LG
   if(collisions) kin.swift(); //initialize swift in root model (SwiftInterface is reference by all child models)
   fol.init(folFileName);
   initFolStateFromKin(fol, kin);
-  if(verbose>0) cout <<"INITIAL LOGIC STATE = " <<*fol.start_state <<endl;
+  //if(verbose>0) cout <<"INITIAL LOGIC STATE = " <<*fol.start_state <<endl;
   finalGeometryObjectives.setModel(kin);
   finalGeometryObjectives.setTiming(1., 1, 1., 1);
   root = new LGP_Node(this, BD_max);
   focusNode = root;
   setHeuristic = nullptr;
+	cost_total = 0.;
+	constraints_total = 0.;
   // oz visuals
   V.setConfiguration(kin);	// oz: remove if unnec. after merge
   if(verbose>0) V.watch("testLGP");	// oz: same as above
@@ -143,6 +145,8 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_
   finalGeometryObjectives.setTiming(1., 1, 1., 1);
   root = new LGP_Node(this, BD_max);
   focusNode = root;
+  cost_total = 0.;
+  constraints_total = 0.;
   // for oz visuals
   V.setConfiguration(kin);	// oz: rem if nec
   if(verbose>0) {
@@ -344,7 +348,8 @@ void LGP_Tree::player(StringA cmds) {
   bool interactive = rai::getParameter<bool>("interact", false);
   bool random = rai::getParameter<bool>("random", false);
 
-  root->expand(5);
+  // this uses the focus node instead of root now in order to be compatible with walk to node
+  focusNode->expand(5);
 
   initDisplay();
 
@@ -483,6 +488,7 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
   if(!fringe_expand.N) HALT("the tree is dead!");
 	LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
   CHECK(n, "");
+	if (n->children.N) return nullptr; // TODO: find out where root is added!!
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
   for(LGP_Node* ch:n->children) {
@@ -719,14 +725,17 @@ void LGP_Tree::run(uint steps) {
   if(verbose>1) views.clear();
 }
 
-void LGP_Tree::run2(uint horizon, uint steps) {
-	init();
+void LGP_Tree::run2(int windowN, uint horizon, uint steps) {
+	//init(); --- replaced by the lines below
+	if (setHeuristic) setHeuristic(root);
+	fringe_expand.append(focusNode);
+	fringe_seq.append(focusNode); // TODO: find out if we need this
 
 	uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
 	double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
 
 	for(uint k=0; k<steps; k++) {
-		step(horizon);
+		step(horizon, windowN);
 
 		if(fringe_solved.N>=stopSol) break;
 		if(COUNT_time>stopTime) break;

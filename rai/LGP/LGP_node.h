@@ -90,7 +90,7 @@ struct LGP_Node {
   //-- helpers to get other nodes
   LGP_NodeL getTreePath() const; ///< return the decision path in terms of a list of nodes (just walking to the root)
   rai::String getTreePathString(char sep=' ') const;
-	rai::String getTreePathString(uint horizon, char sep=' ') const;
+	rai::String getTreePathString(int from, uint to, char sep=' ') const; ///< get a window of the treePathString
   LGP_Node* getRoot(); ///< return the decision path in terms of a list of nodes (just walking to the root)
   LGP_Node* getChildByAction(Node*  folDecision); ///<
   void getAll(LGP_NodeL& L);
@@ -101,9 +101,7 @@ struct LGP_Node {
   Skeleton getSkeleton(bool finalStateOnly, uint horizon) const;
 
   // RHC functionalities
-	void solveBound(BoundType bound, Skeleton S, shared_ptr<KOMO> komo, const rai::Configuration &kinematics, bool collisions);
-	rai::Configuration optBound2(BoundType bound, bool collisions, int verbose=-1);
-	void optBound3(BoundType bound, bool collisions, uint horizon, Skeleton previousSkeleton, int verbose=-1);
+	void optBound3(BoundType bound, bool collisions, uint horizon, Skeleton previousSkeleton, double total_cost, double total_constraints, int verbose=-1);
  private:
   void setInfeasible(); ///< set this and all children infeasible
   void labelInfeasible(); ///< sets this infeasible AND propagates this label up-down to others

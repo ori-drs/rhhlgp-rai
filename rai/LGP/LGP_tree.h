@@ -89,10 +89,8 @@ struct LGP_Tree : GLDrawer {
 
  public:
   void run(uint steps=300000);
-  void run2(uint horizon=1000, uint steps=300000);
   void init();
   void step();
-	void step(uint horizon);
   void buildTree(uint depth);
   void getSymbolicSolutions(uint depth);
   void optFixedSequence(const rai::String& seq, BoundType specificBound=BD_all, bool collisions=false);
@@ -124,8 +122,11 @@ struct LGP_Tree : GLDrawer {
   void player(StringA cmds= {});
 
   //-- RHC stuff
-	rai::Configuration run2(uint steps);
+	void run2(int windowN, uint horizon=1000, uint steps=300000);
+	void step(uint horizon, int windowN);
 	Skeleton oldSkeleton;
+	double cost_total;
+	double constraints_total;
 };
 
 struct LGP_Tree_Thread : LGP_Tree, Thread {

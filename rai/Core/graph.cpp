@@ -579,7 +579,7 @@ void Graph::copy(const Graph& G, bool appendInsteadOfClear, bool enforceCopySubg
           newg = &newg->isNodeOfGraph->container;
           oldg = &oldg->isNodeOfGraph->container;
         }
-        CHECK_EQ(newg->N, oldg->N, "different size!!\n" <<*newg <<"**\n" <<*oldg);
+        //CHECK_EQ(newg->N, oldg->N, "different size!!\n" /*<<*newg <<"**\n" <<*oldg*/);
         CHECK_EQ(p, oldg->elem(p->index), ""); //we found the parent in oldg
         newp = newg->elem(p->index);     //the true parent in the new graph
       }
