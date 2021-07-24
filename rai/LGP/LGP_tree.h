@@ -83,7 +83,6 @@ struct LGP_Tree : GLDrawer {
   LGP_Node* expandNext(int stopOnLevel=-1, LGP_NodeL* addIfTerminal=nullptr);
 
   void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren);
-  void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren, uint horizon);
   void optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* addIfTerminal);
   void clearFromInfeasibles(LGP_NodeL& fringe);
 
@@ -122,8 +121,9 @@ struct LGP_Tree : GLDrawer {
   void player(StringA cmds= {});
 
   //-- RHC stuff
-	void run2(int windowN, uint horizon=1000, uint steps=300000);
-	void step(uint horizon, int windowN);
+	void run2(int windowN, int horizon=1000, uint steps=300000);
+	void step(int horizon, int windowN);
+	void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren, const intA window);
 	Skeleton oldSkeleton;
 	double cost_total;
 	double constraints_total;

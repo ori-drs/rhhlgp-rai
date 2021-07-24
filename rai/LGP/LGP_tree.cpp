@@ -135,7 +135,7 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const char* folFileName) : LG
 	constraints_total = 0.;
   // oz visuals
   V.setConfiguration(kin);	// oz: remove if unnec. after merge
-  if(verbose>0) V.watch("testLGP");	// oz: same as above
+  //if(verbose>0) V.watch("testLGP");	// oz: same as above
 }
 
 LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_Tree() {
@@ -149,10 +149,10 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_
   constraints_total = 0.;
   // for oz visuals
   V.setConfiguration(kin);	// oz: rem if nec
-  if(verbose>0) {
+  /*if(verbose>0) {
     V.watch("testLGP");	// oz: rem if nec
     cout <<"INITIAL LOGIC STATE = " <<*root->folState <<endl;
-  }
+  }*/
 	setHeuristic = nullptr;
 }
 
@@ -725,7 +725,7 @@ void LGP_Tree::run(uint steps) {
   if(verbose>1) views.clear();
 }
 
-void LGP_Tree::run2(int windowN, uint horizon, uint steps) {
+void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	//init(); --- replaced by the lines below
 	if (setHeuristic) setHeuristic(root);
 	fringe_expand.append(focusNode);

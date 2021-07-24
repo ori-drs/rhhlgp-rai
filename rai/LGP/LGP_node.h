@@ -98,10 +98,10 @@ struct LGP_Node {
   void checkConsistency();
 
   Skeleton getSkeleton(bool finalStateOnly=false) const;
-  Skeleton getSkeleton(bool finalStateOnly, uint horizon) const;
+  Skeleton getSkeleton(bool finalStateOnly, uint from, uint to) const;
 
   // RHC functionalities
-	void optBound3(BoundType bound, bool collisions, uint horizon, Skeleton previousSkeleton, double total_cost, double total_constraints, int verbose=-1);
+	void optBound3(BoundType bound, bool collisions, intA window, Skeleton previousSkeleton, double total_cost, double total_constraints, int verbose=-1);
  private:
   void setInfeasible(); ///< set this and all children infeasible
   void labelInfeasible(); ///< sets this infeasible AND propagates this label up-down to others
