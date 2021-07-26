@@ -443,7 +443,7 @@ uintA Configuration::getCtrlFramesAndScale(arr& scale) const {
   uintA qFrames;
   for(rai::Frame* f : frames) {
     rai::Joint *j = f->joint;
-    if(j && j->active && j->dim>0 && (!j->mimic) && j->H>0. && j->type!=rai::JT_tau && (!f->ats || !(*f->ats)["constant"]) && j->type != JT_free) {	//< exclude free joints here
+    if(j && j->active && j->dim>0 && (!j->mimic) && j->H>0. && j->type!=rai::JT_tau && (!f->ats || !(*f->ats)["constant"]) && j->type!=JT_free /*&& !f->parent->joint*/) {	//< exclude free joints here
       qFrames.append(TUP(f->ID, f->parent->ID));
       if(!!scale) scale.append(j->H, j->dim);
     }

@@ -545,7 +545,8 @@ void KOMO::setSkeleton(const Skeleton& S) {
         addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
         //slow - down - up
         if(k_order>=2){
-          addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
+					// FS_qItself removed due to issues with free joints
+					//addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
           addObjective({s.phase0-.1,s.phase0+.1}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2);
         }
         break;
@@ -555,7 +556,8 @@ void KOMO::setSkeleton(const Skeleton& S) {
         addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
         //slow - down - up
         if(k_order>=2){
-          addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
+        	// FS_qItself removed due to issues with free joints
+          //addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
           addObjective({s.phase0-.1,s.phase0+.1}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2);
         }
         break;

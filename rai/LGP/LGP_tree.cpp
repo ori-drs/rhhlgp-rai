@@ -729,7 +729,7 @@ void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	//init(); --- replaced by the lines below
 	if (setHeuristic) setHeuristic(root);
 	fringe_expand.append(focusNode);
-	fringe_seq.append(focusNode); // TODO: find out if we need this
+	//fringe_seq.append(focusNode); // TODO: find out if we need this
 
 	uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
 	double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
@@ -748,15 +748,15 @@ void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	writeNodeList(output);
 	output.close();
 
-	//this generates the movie!
-	if(verbose>3) {
+	//this generates the movie! -- FIXME
+	/*if(verbose>3) {
 		//    renderToVideo();
 		rai::system(STRING("mkdir -p " <<OptLGPDataPath <<"vid"));
 		rai::system(STRING("rm -f " <<OptLGPDataPath <<"vid/*.ppm"));
 		dth->resetSteppings();
 		dth->saveVideo = true;
 		rai::wait(20.);
-	}
+	}*/
 
 	if(verbose>1) views.clear();
 }
