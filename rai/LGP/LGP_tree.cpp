@@ -735,10 +735,10 @@ void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
 
 	for(uint k=0; k<steps; k++) {
-		step(horizon, windowN); 						// call step with horizon
+		step(horizon, windowN); 						//< call step with horizon
 
 		if(fringe_solved.N>=stopSol) break;
-		if(COUNT_time>stopTime) break;
+		//if(COUNT_time>stopTime) break;		//< count time is counting the entire opt time so we dont want this here
 	}
 
 	if(verbose>0) report(true);
