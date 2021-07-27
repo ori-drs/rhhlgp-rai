@@ -539,24 +539,27 @@ void KOMO::setSkeleton(const Skeleton& S) {
       case SY_impulse:    HALT("obsolete"); /*add_impulse(s.phase0, s.frames(0), s.frames(1));*/  break;
 
       case SY_topBoxGrasp: {
-      	// TODO: find right way to adjust position difference without collision at the base
         addObjective({s.phase0}, FS_positionDiff, s.frames, OT_eq, {1e2});
         addObjective({s.phase0}, FS_scalarProductXX, s.frames, OT_eq, {1e2}, {0.});
         addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
         //slow - down - up
         if(k_order>=2){
 					// FS_qItself removed due to issues with free joints
+					//addObjective({s.phase0}, make_shared<F_qItself>(F_qItself::byExcludeJointNames, s.frames, world), {}, OT_eq, {}, {}, 1);
 					//addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
           addObjective({s.phase0-.1,s.phase0+.1}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2);
         }
         break;
       }
       case SY_topBoxPlace: {
-        //addObjective({s.phase0}, FS_positionDiff, {s.frames(1), s.frames(2)}, OT_eq, {1e2}, {0,0,.08}); //arr({1,3},{0,0,1e2})
+				double objSize = shapeSize(world, s.frames(1), 2);
+				double targetSize = shapeSize(world, s.frames(2), 2);
+        addObjective({s.phase0}, FS_positionDiff, {s.frames(1), s.frames(2)}, OT_eq, arr({1,3},{0, 0, 1e2}), {0,0,(objSize+targetSize)/2});
         addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
         //slow - down - up
         if(k_order>=2){
         	// FS_qItself removed due to issues with free joints
+					//addObjective({s.phase0}, make_shared<F_qItself>(F_qItself::byExcludeJointNames, s.frames, world), {}, OT_eq, {}, {}, 1);
           //addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
           addObjective({s.phase0-.1,s.phase0+.1}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2);
         }
@@ -633,12 +636,6 @@ void KOMO::setSkeleton(const Skeleton& S) {
       // FIXME: this is not working properly yet. -- maybe use oppose?
       // I tried to use it to improve the connections between objects and walkers
 			case SY_connectObject: {
-				//double boxSize = 0.;//shapeSize(world, s.frames(1), 1);
-				//addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0.5, 0.});
-				//addObjective({s.phase0, s.phase1}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {{1,3},{0.,0.,1e2}}, {0.,0.,0.}); //arr({1,3},{0,0,1e2})
-				//addObjective({s.phase0}, FS_scalarProductXY, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
-				//addObjective({s.phase0, s.phase1}, FS_scalarProductYZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
-				//addObjective({s.phase0}, FS_scalarProductXZ, {s.frames(1), s.frames(0)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductZZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2},{-1.});
 			} break;
 
