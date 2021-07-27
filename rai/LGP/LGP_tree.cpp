@@ -729,13 +729,13 @@ void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	//init(); --- replaced by the lines below
 	if (setHeuristic) setHeuristic(root);
 	fringe_expand.append(focusNode);
-	//fringe_seq.append(focusNode); // TODO: find out if we need this
+	//fringe_seq.append(focusNode); 			// this can be skipped since root will always be optimized with seqBound in previous problem
 
 	uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
 	double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
 
 	for(uint k=0; k<steps; k++) {
-		step(horizon, windowN);
+		step(horizon, windowN); 						// call step with horizon
 
 		if(fringe_solved.N>=stopSol) break;
 		if(COUNT_time>stopTime) break;
