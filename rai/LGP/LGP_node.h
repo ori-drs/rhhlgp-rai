@@ -99,6 +99,7 @@ struct LGP_Node {
 
   Skeleton getSkeleton(bool finalStateOnly=false) const;
   Skeleton getSkeleton(bool finalStateOnly, uint from, uint to) const;
+	Skeleton getWindowSkeleton(intA window) const;
 
   // RHC functionalities
 	void optBound3(BoundType bound, bool collisions, intA window, Skeleton previousSkeleton, double total_cost, double total_constraints, int verbose=-1);
