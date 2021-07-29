@@ -627,8 +627,12 @@ void LGP_Tree::step() {
     solutions.set()->append(new LGP_Tree_SolutionData(*this, fringe_solved.last()));
     solutions.set()->sort(sortComp2);
     if(verbose>0) {
-      V.setPath(focusNode->komoProblem(BD_seqPath)->getPath_X(), "", false); // last arg: true to 'press enter'
-      while(V.playVideo(true, 3.));  //1st arg: true ->to move fwd with a keypress, last arg for saving vid: "z.vid/"
+    	BoundType bound;
+			if (focusNode->komoProblem(BD_seqPath)) bound = BD_seqPath;
+			else if(focusNode->komoProblem(BD_path)) bound = BD_path;
+			else HALT("NO KOMO FOUND");
+			focusNode->komoProblem(bound)->view(true, "optimized motion");
+			while(focusNode->komoProblem(bound)->view_play(true));
     }
   }
 
