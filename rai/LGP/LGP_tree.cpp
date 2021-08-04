@@ -131,10 +131,11 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const char* folFileName) : LG
   root = new LGP_Node(this, BD_max);
   focusNode = root;
   setHeuristic = nullptr;
+  startDepth = 0;
 	cost_total = 0.;
 	constraints_total = 0.;
   // oz visuals
-  V.setConfiguration(kin);	// oz: remove if unnec. after merge
+  V.setConfiguration(kin);						// oz: remove if unnec. after merge
   //if(verbose>0) V.watch("testLGP");	// oz: same as above
 }
 
@@ -498,7 +499,7 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
       LGP_NodeL path = ch->getTreePath();
 			// NEW: skip pose bound and add to fringe seq directly, was fringe_poseToGoal
 			// TODO: ask Oz why we add every node on the path here??
-			for(LGP_Node* n:path) if(!n->count(1)) fringe_seq.setAppend(n); //pose2 is a FIFO
+			for(LGP_Node* n:path) if(!n->count(1) /*&& n->step >= startDepth*/) fringe_seq.setAppend(n);
     } else {
       fringe_expand.append(ch);
     }
@@ -529,6 +530,10 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
     }
     // NEW: use path bound if seq path does not work
     else if(bound == BD_seqPath && !n->feasible(bound)) {
+    	Graph result = n->komoProblem(BD_seqPath)->getReport((n->komoProblem(BD_seqPath)->verbose>0 && bound>=2));
+    	double constraints_here = result.get<double>("eq");
+    	constraints_here += result.get<double>("ineq");
+    	cout << "FEASIBLE SEQ PATH= " << constraints_here << endl;
 			RAI_MSG("TRYING PATH BOUND");
 			try {
 				n->optBound(BD_path, collisions, verbose-2);
@@ -537,6 +542,10 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
 				n->write(cout, false, true);
 				LOG(-3) <<"node optimization failed";
 			}
+			result = n->komoProblem(BD_path)->getReport((n->komoProblem(BD_seqPath)->verbose>0 && bound>=2));
+			constraints_here = result.get<double>("eq");
+			constraints_here += result.get<double>("ineq");
+			cout << "FEASIBLE PATH= " << constraints_here << endl;
 			if(n->feasible(BD_path)) {
 				if(addIfTerminal && n->isTerminal) addIfTerminal->append(n);
 				if(addChildren) for(LGP_Node* c:n->children) addChildren->append(c);
@@ -733,6 +742,7 @@ void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	//init(); --- replaced by the lines below
 	if (setHeuristic) setHeuristic(root);
 	fringe_expand.append(focusNode);
+	startDepth = windowN*horizon;
 	//fringe_seq.append(focusNode); 			// this can be skipped since root will always be optimized with seqBound in previous problem
 
 	uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
@@ -752,15 +762,6 @@ void LGP_Tree::run2(int windowN, int horizon, uint steps) {
 	writeNodeList(output);
 	output.close();
 
-	//this generates the movie! -- FIXME
-	/*if(verbose>3) {
-		//    renderToVideo();
-		rai::system(STRING("mkdir -p " <<OptLGPDataPath <<"vid"));
-		rai::system(STRING("rm -f " <<OptLGPDataPath <<"vid/*.ppm"));
-		dth->resetSteppings();
-		dth->saveVideo = true;
-		rai::wait(20.);
-	}*/
 
 	if(verbose>1) views.clear();
 }

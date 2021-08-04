@@ -102,7 +102,7 @@ struct LGP_Node {
 	Skeleton getWindowSkeleton(intA window) const;
 
   // RHC functionalities
-	void optBound3(BoundType bound, bool collisions, intA window, Skeleton previousSkeleton, double total_cost, double total_constraints, int verbose=-1);
+	void optBound3(BoundType bound, bool collisions, intA window, double total_cost, double total_constraints, int verbose=-1);
  private:
   void setInfeasible(); ///< set this and all children infeasible
   void labelInfeasible(); ///< sets this infeasible AND propagates this label up-down to others

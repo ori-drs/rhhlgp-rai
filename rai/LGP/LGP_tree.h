@@ -124,7 +124,7 @@ struct LGP_Tree : GLDrawer {
 	void run2(int windowN, int horizon=1000, uint steps=300000);
 	void step(int horizon, int windowN);
 	void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren, const intA window);
-	Skeleton oldSkeleton;
+	int startDepth;
 	double cost_total;
 	double constraints_total;
 };

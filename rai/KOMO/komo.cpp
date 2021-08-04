@@ -629,11 +629,10 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
 				addObjective({s.phase0, s.phase1}, FS_scalarProductZZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2},{-1.});
 				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., -effectorSize});		// negative dist because z-axis is flipped for crawlers
-				//addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., -.12});		// TODO: use effector size
 			} break;
 
 
-      // FIXME: this is not working properly yet. -- maybe use oppose?
+      // TODO: remove
       // I tried to use it to improve the connections between objects and walkers
 			case SY_connectObject: {
 				addObjective({s.phase0, s.phase1}, FS_scalarProductZZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2},{-1.});
