@@ -641,7 +641,7 @@ void LGP_Tree::step() {
 			else if(focusNode->komoProblem(BD_path)) bound = BD_path;
 			else HALT("NO KOMO FOUND");
 			focusNode->komoProblem(bound)->view(true, "optimized motion");
-			while(focusNode->komoProblem(bound)->view_play(true));
+			focusNode->komoProblem(bound)->view_play(true);
     }
   }
 
