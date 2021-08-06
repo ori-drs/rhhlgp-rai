@@ -130,13 +130,11 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const char* folFileName) : LG
   finalGeometryObjectives.setTiming(1., 1, 1., 1);
   root = new LGP_Node(this, BD_max);
   focusNode = root;
-  setHeuristic = nullptr;
-  startDepth = 0;
-	cost_total = 0.;
-	constraints_total = 0.;
+  heuristicCosts = nullptr;
+	/*cost_total = 0.;
+	constraints_total = 0.;*/
   // oz visuals
   V.setConfiguration(kin);						// oz: remove if unnec. after merge
-  //if(verbose>0) V.watch("testLGP");	// oz: same as above
 }
 
 LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_Tree() {
@@ -146,15 +144,9 @@ LGP_Tree::LGP_Tree(const rai::Configuration& _kin, const FOL_World& _fol) : LGP_
   finalGeometryObjectives.setTiming(1., 1, 1., 1);
   root = new LGP_Node(this, BD_max);
   focusNode = root;
-  cost_total = 0.;
-  constraints_total = 0.;
+  heuristicCosts = nullptr;
   // for oz visuals
   V.setConfiguration(kin);	// oz: rem if nec
-  /*if(verbose>0) {
-    V.watch("testLGP");	// oz: rem if nec
-    cout <<"INITIAL LOGIC STATE = " <<*root->folState <<endl;
-  }*/
-	setHeuristic = nullptr;
 }
 
 LGP_Tree::~LGP_Tree() {
@@ -487,25 +479,23 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-	LGP_Node* n = !setHeuristic ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
+	LGP_Node* n = !heuristicCosts ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
   CHECK(n, "");
-	if (n->children.N) return nullptr; // TODO: find out where root is added!!
+	if (n->children.N) return nullptr; 				// if we already saw this node then dont expand it again
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
   for(LGP_Node* ch:n->children) {
-  	if (setHeuristic) setHeuristic(ch);
+  	if (heuristicCosts) heuristicCosts(ch);
 		if(ch->isTerminal) {
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
 			// NEW: skip pose bound and add to fringe seq directly, was fringe_poseToGoal
-			// TODO: ask Oz why we add every node on the path here??
-			for(LGP_Node* n:path) if(!n->count(1) /*&& n->step >= startDepth*/) fringe_seq.setAppend(n);
+			for(LGP_Node* n:path) if(!n->count(1)) fringe_seq.setAppend(n);
     } else {
       fringe_expand.append(ch);
     }
 		// NEW: skip pose bound and add to fringe seq; was fringe pose
 		if(addIfTerminal && ch->isTerminal) addIfTerminal->append(ch);
-    //if(n->count(1)) fringe_seq.append(ch);
   }
   return n;
 }
@@ -513,7 +503,6 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
 void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawFrom, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren) { //optimize a seq
   if(!drawFringe.N) return;
   LGP_Node* n = popBest(drawFringe, drawFrom);
-  // cout << "EXPANDING optBestOnLevel: " << n << endl;
   if(n && !n->count(bound)) {
     try {
     	// optBound is the classic and unchanged implementation
@@ -621,12 +610,7 @@ void LGP_Tree::step() {
 
   uint numSol = fringe_solved.N;
 
-  // TODO: here you can check around a bit
-	//if(rnd.uni()<.5) optBestOnLevel(BD_pose, fringe_pose, BD_symbolic, &fringe_seq, &fringe_pose);
-	//if(rnd.uni()<.5) optFirstOnLevel(BD_pose, fringe_poseToGoal, &fringe_seq);
-	// NEW: skip pose bound?
-	//optBestOnLevel(BD_pose, fringe_poseToGoal, BD_symbolic, &fringe_seq, &fringe_pose);
-	//optBestOnLevel(BD_seq, fringe_seq, BD_pose, &fringe_path, nullptr);
+  // optBest with our bounds
 	optBestOnLevel(BD_seq, fringe_seq, BD_symbolic, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
@@ -641,7 +625,7 @@ void LGP_Tree::step() {
 			else if(focusNode->komoProblem(BD_path)) bound = BD_path;
 			else HALT("NO KOMO FOUND");
 			focusNode->komoProblem(bound)->view(true, "optimized motion");
-			focusNode->komoProblem(bound)->view_play(true);
+			focusNode->komoProblem(bound)->view_play(true); 				//< press q to continue after video was displayed
     }
   }
 
@@ -694,7 +678,7 @@ void LGP_Tree::getSymbolicSolutions(uint depth) {
 }
 
 void LGP_Tree::init() {
-	if (setHeuristic) setHeuristic(root);
+	if (heuristicCosts) heuristicCosts(root);
   fringe_expand.append(root);
   // NEW: skipping poseBound
   //fringe_pose.append(root);
@@ -736,34 +720,6 @@ void LGP_Tree::run(uint steps) {
   }
 
   if(verbose>1) views.clear();
-}
-
-void LGP_Tree::run2(int windowN, int horizon, uint steps) {
-	//init(); --- replaced by the lines below
-	if (setHeuristic) setHeuristic(root);
-	fringe_expand.append(focusNode);
-	startDepth = windowN*horizon;
-	//fringe_seq.append(focusNode); 			// this can be skipped since root will always be optimized with seqBound in previous problem
-
-	uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
-	double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
-
-	for(uint k=0; k<steps; k++) {
-		step(horizon, windowN); 						//< call step with horizon
-
-		if(fringe_solved.N>=stopSol) break;
-		//if(COUNT_time>stopTime) break;		//< count time is counting the entire opt time so we dont want this here
-	}
-
-	if(verbose>0) report(true);
-
-	//basic output
-	ofstream output(dataPath+"lgpopt");
-	writeNodeList(output);
-	output.close();
-
-
-	if(verbose>1) views.clear();
 }
 
 LGP_Tree_SolutionData::LGP_Tree_SolutionData(LGP_Tree& _tree, LGP_Node* _node) : tree(_tree), node(_node) {

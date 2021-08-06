@@ -53,8 +53,7 @@ enum SkeletonSymbol {
   SY_quasiStaticOn,
   SY_downUp, //old
   SY_break,
-  SY_connectBananas,
-  SY_connectObject,
+  SY_connectCrawlers,
 
   //interactions:
   SY_contact,

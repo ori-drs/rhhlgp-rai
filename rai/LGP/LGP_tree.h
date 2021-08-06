@@ -97,7 +97,7 @@ struct LGP_Tree : GLDrawer {
 
   //-- work directly on the tree
   LGP_Node* walkToNode(const rai::String& seq);
-  void (*setHeuristic)(LGP_Node *n);	// set a heuristic to use in the run loop
+  void (*heuristicCosts)(LGP_Node *n);	// set a heuristic to use in the run loop
 
   // output
   uint numFoundSolutions();
@@ -120,13 +120,10 @@ struct LGP_Tree : GLDrawer {
   void inspectSequence(const rai::String& seq);
   void player(StringA cmds= {});
 
-  //-- RHC stuff
+  //-- RHLGP functionalities -- overlaoded old functionalities to work with horizon
 	void run2(int windowN, int horizon=1000, uint steps=300000);
 	void step(int horizon, int windowN);
 	void optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawBound, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren, const intA window);
-	int startDepth;
-	double cost_total;
-	double constraints_total;
 };
 
 struct LGP_Tree_Thread : LGP_Tree, Thread {

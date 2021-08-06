@@ -623,7 +623,7 @@ void KOMO::setSkeleton(const Skeleton& S) {
       case SY_break:      addObjective({s.phase0, s.phase1}, make_shared<F_NoJumpFromParent_OBSOLETE>(), {s.frames(0)}, OT_eq, {1e2}, NoArr, 1, 0, 0);  break;
 
     	// connect two crawler robots -- align coord. systems and make z-axes oppose
-      case SY_connectBananas: {
+      case SY_connectCrawlers: {
 				double effectorSize = shapeSize(world, s.frames(0), 0);
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXY, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.}); // maybe drop this
 				addObjective({s.phase0, s.phase1}, FS_scalarProductXZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0.});
@@ -631,12 +631,6 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				addObjective({s.phase0, s.phase1}, FS_positionRel, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., -effectorSize});		// negative dist because z-axis is flipped for crawlers
 			} break;
 
-
-      // TODO: remove
-      // I tried to use it to improve the connections between objects and walkers
-			case SY_connectObject: {
-				addObjective({s.phase0, s.phase1}, FS_scalarProductZZ, {s.frames(0), s.frames(1)}, OT_eq, {1e2},{-1.});
-			} break;
 
       case SY_contact:    addContact_slide(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
       case SY_contactStick:    addContact_stick(s.phase0, s.phase1, s.frames(0), s.frames(1));  break;
@@ -2247,8 +2241,7 @@ template<> const char* rai::Enum<SkeletonSymbol>::names []= {
   "quasiStaticOn",
   "downUp",
   "break",
-  "connectBananas",
-  "connectObject",
+  "connectCrawlers",
 
   "contact",
   "contactStick",

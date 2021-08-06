@@ -90,7 +90,6 @@ struct LGP_Node {
   //-- helpers to get other nodes
   LGP_NodeL getTreePath() const; ///< return the decision path in terms of a list of nodes (just walking to the root)
   rai::String getTreePathString(char sep=' ') const;
-	rai::String getTreePathString(int from, uint to, char sep=' ') const; ///< get a window of the treePathString
   LGP_Node* getRoot(); ///< return the decision path in terms of a list of nodes (just walking to the root)
   LGP_Node* getChildByAction(Node*  folDecision); ///<
   void getAll(LGP_NodeL& L);
@@ -98,11 +97,13 @@ struct LGP_Node {
   void checkConsistency();
 
   Skeleton getSkeleton(bool finalStateOnly=false) const;
-  Skeleton getSkeleton(bool finalStateOnly, uint from, uint to) const;
-	Skeleton getWindowSkeleton(intA window) const;
 
-  // RHC functionalities
-	void optBound3(BoundType bound, bool collisions, intA window, double total_cost, double total_constraints, int verbose=-1);
+  // RHLGP functionalities
+	void optBound3(BoundType bound, bool collisions, intA window, int verbose=-1);
+	Skeleton getSkeleton(bool finalStateOnly, uint from, uint to) const; 	///< get skeleton for a specific time window
+	Skeleton getNextHorizonSkeleton(intA window) const; 								 	///< get for the next horizon
+	rai::String getTreePathString(int from, uint to, char sep=' ') const; ///< get a window of the treePathString
+
  private:
   void setInfeasible(); ///< set this and all children infeasible
   void labelInfeasible(); ///< sets this infeasible AND propagates this label up-down to others

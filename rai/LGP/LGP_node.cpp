@@ -205,7 +205,7 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
     cost_here = komo->sos;
     constraints_here = komo->ineq + komo->eq;
   }
-  // TODO: try to use different values here (less than 3,4,5)
+
   bool feas = (constraints_here<2.5);
 
   if(komo->verbose>0) {
@@ -298,7 +298,6 @@ LGP_NodeL LGP_Node::getTreePath() const {
   return path;
 }
 
-// TODO: write into here
 rai::String LGP_Node::getTreePathString(char sep) const {
   LGP_NodeL path = getTreePath();
   rai::String str;
