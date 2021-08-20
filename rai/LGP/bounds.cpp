@@ -229,7 +229,7 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   if(pathOrder==1) komo->setSquaredQVelocities();
   else komo->setSquaredQAccelerations();
 #else
-  komo->add_qControlObjective({}, 2, 1.);
+  komo->add_qControlObjective({}, 2, 2.);
   komo->add_qControlObjective({}, 0, 1e-2);
 #endif
 
