@@ -477,15 +477,14 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
 }
 
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
-  //    MNode *n =  popBest(fringe_expand, 0);
   if(!fringe_expand.N) HALT("the tree is dead!");
-	LGP_Node* n = !heuristicCosts ? fringe_expand.popFirst() : popBest(fringe_expand, BD_symbolic);	// either use popFirst or the node with best heuristic if there is one
+  LGP_Node* n = heuristicCosts ? popBest(fringe_expand, BD_symbolic) : fringe_expand.popFirst();	// either use popFirst or the node with best heuristic if there is one
   CHECK(n, "");
 	if (n->children.N) return nullptr; 				// if we already saw this node then dont expand it again
   if(stopOnDepth>0 && n->step>=(uint)stopOnDepth) return nullptr;
   n->expand();
   for(LGP_Node* ch:n->children) {
-  	if (heuristicCosts) heuristicCosts(ch);
+  	if (heuristicCosts) heuristicCosts(ch); // here we compute the heuristic costs and write them into ch->costs(BD_sym)
 		if(ch->isTerminal) {
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
