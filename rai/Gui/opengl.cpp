@@ -574,7 +574,8 @@ void glStandardLight(void*, OpenGL&) {
 void glStandardScene(void*, OpenGL& gl) {
   glPushAttrib(GL_CURRENT_BIT);
   glStandardLight(nullptr, gl);
-  glDrawFloor(10, .5, .55, .6);
+  //glDrawFloor(10, .5, .55, .6);
+  //glDrawFloor(4, .7647, .788, .788);
   // glDrawFloor(10, 1.5, 0.83, .0);
   // glDrawFloor(10., 108./255., 123./255., 139./255.);
   glDrawAxes(.1);
