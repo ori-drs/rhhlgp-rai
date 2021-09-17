@@ -61,7 +61,7 @@ void solve(){
   lgp.fol.addTerminalRule("(on tray obj0) (on tray obj1) (on tray obj2)");
   lgp.displayBound = BD_seqPath;
   //lgp.verbose=2;
-	lgp.setHeuristic = heuristic;
+  lgp.heuristicCosts = heuristic;
 
 	lgp.fol.writePDDLfiles("z");
 
