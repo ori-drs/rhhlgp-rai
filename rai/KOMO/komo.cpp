@@ -555,14 +555,8 @@ void KOMO::setSkeleton(const Skeleton& S) {
 				double objSize = shapeSize(world, s.frames(1), 2);
 				double targetSize = shapeSize(world, s.frames(2), 2);
         addObjective({s.phase0}, FS_positionDiff, {s.frames(1), s.frames(2)}, OT_eq, arr({1,3},{0, 0, 1e2}), {0,0,(objSize+targetSize)/2});
-        addObjective({s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e2}, {0., 0., 1.});
-        //slow - down - up
-        if(k_order>=2){
-        	// FS_qItself removed due to issues with free joints
-					//addObjective({s.phase0}, make_shared<F_qItself>(F_qItself::byExcludeJointNames, s.frames, world), {}, OT_eq, {}, {}, 1);
-          //addObjective({s.phase0}, FS_qItself, {}, OT_eq, {}, {}, 1);
-          addObjective({s.phase0-.1,s.phase0+.1}, FS_position, {s.frames(0)}, OT_eq, {}, {0.,0.,.1}, 2);
-        }
+        addObjective({s.phase0}, FS_scalarProductYZ, {s.frames(1), s.frames(2)}, OT_eq, {1e2}, {0.});
+        addObjective({s.phase0}, FS_scalarProductXZ, {s.frames(1), s.frames(2)}, OT_eq, {1e2}, {0.});
         break;
       }
 
