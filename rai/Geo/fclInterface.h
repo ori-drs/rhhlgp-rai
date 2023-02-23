@@ -10,18 +10,61 @@
 
 #include "mesh.h"
 
+#ifdef RAI_FCL
+#include <fcl/config.h>
+
+#if FCL_MINOR_VERSION < 6  // version 0.5.x
+
 namespace fcl {
 class CollisionObject;
 class DynamicAABBTreeCollisionManager;
 class BroadPhaseCollisionManager;
+
+using CollisionObjectd = CollisionObject;
+using DynamicAABBTreeCollisionManagerd = DynamicAABBTreeCollisionManager;
+using BroadPhaseCollisionManagerd = BroadPhaseCollisionManager;
 };
+
+#else
+// The code has been adapted as if the API were from at least 0.6.0
+namespace fcl {
+template<typename S>
+class CollisionObject;
+template<typename S>
+class DynamicAABBTreeCollisionManager;
+template<typename S>
+class BroadPhaseCollisionManager;
+
+using CollisionObjectd = CollisionObject<double>;
+using DynamicAABBTreeCollisionManagerd = DynamicAABBTreeCollisionManager<double>;
+using BroadPhaseCollisionManagerd = BroadPhaseCollisionManager<double>;
+};
+
+#endif
+
+#else
+
+namespace fcl {
+template<typename S>
+class CollisionObject;
+template<typename S>
+class DynamicAABBTreeCollisionManager;
+template<typename S>
+class BroadPhaseCollisionManager;
+
+using CollisionObjectd = CollisionObject<double>;
+using DynamicAABBTreeCollisionManagerd = DynamicAABBTreeCollisionManager<double>;
+using BroadPhaseCollisionManagerd = BroadPhaseCollisionManager<double>;
+};
+
+#endif
 
 namespace rai {
 
 struct FclInterface {
   Array<ptr<struct ConvexGeometryData>> convexGeometryData;
-  std::vector<fcl::CollisionObject*> objects;
-  shared_ptr<fcl::BroadPhaseCollisionManager> manager;
+  std::vector<fcl::CollisionObjectd*> objects;
+  shared_ptr<fcl::BroadPhaseCollisionManagerd> manager;
 
   double cutoff=0.; //0 -> perform fine boolean collision check; >0 -> perform fine distance computations; <0 -> only broadphase
   uintA collisions; //return values!
@@ -34,7 +77,7 @@ struct FclInterface {
 
 private: //called by collision callback
   void addCollision(void* userData1, void* userData2);
-  static bool BroadphaseCallback(fcl::CollisionObject* o1, fcl::CollisionObject* o2, void* cdata_);
+  static bool BroadphaseCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* cdata_);
 };
 
 }
