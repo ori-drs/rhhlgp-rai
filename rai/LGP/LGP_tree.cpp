@@ -688,6 +688,31 @@ void LGP_Tree::init() {
 //  }
 }
 
+rai::String LGP_Tree::report_csv() {
+  rai::String out;
+  LGP_Node* bpose = getBest(terminals, 1);
+  LGP_Node* bseq  = getBest(terminals, 2);
+  LGP_Node* bpath = getBest(fringe_solved, 3);
+
+  out << "TIME " << "TREE " << "POSE " << "SEQ " << "EXPANDED " << "\n";//<< "PATH " << "bestPose " << "bestSeq "<< "bestPath " << "#solutions " << "\n";
+  csv_file << out;
+  out.clear();
+  out <<rai::cpuTime() 
+      <<" " <<COUNT_node
+      <<" " <<COUNT_opt(BD_pose) 
+      <<" " <<COUNT_opt(BD_seq)
+      <<" " <<numSteps;
+      // <<" " <<COUNT_opt(BD_path)+COUNT_opt(BD_seqPath)
+      // <<" " <<(bpose?bpose->cost(1):100.)
+      // <<" " <<(bseq ?bseq ->cost(2):100.)
+      // <<" " <<(bpath?bpath->cost(displayBound):100.)
+      // <<" " <<fringe_solved.N      
+  
+  csv_file << out;
+  csv_file.close();
+  return out;
+}
+
 void LGP_Tree::run(uint steps) {
   init();
 
@@ -701,6 +726,11 @@ void LGP_Tree::run(uint steps) {
     if(COUNT_time>stopTime) break;
   }
 
+  if(write_csv){
+    csv_file.open("data.csv");
+    report_csv();
+    csv_file.close();
+  }
   if(verbose>0) report(true);
 
   //basic output
