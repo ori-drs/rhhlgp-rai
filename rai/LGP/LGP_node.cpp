@@ -17,6 +17,8 @@
 #include "../Gui/opengl.h"
 #include "../Kin/viewer.h"
 
+#include "../../../../test_service/src/heuristic_service.h"
+
 #define DEBUG(x) //x
 #define DEL_INFEASIBLE(x) //x
 
@@ -117,7 +119,7 @@ void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
   new LGP_Node(this, action);
 }
 
-void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
+void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool waypoints_from_service) {
   if(komoProblem(bound)) komoProblem(bound).reset();
   komoProblem(bound) = make_shared<KOMO>();
   ptr<KOMO>& komo = komoProblem(bound);
@@ -133,15 +135,57 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
   Skeleton S = getSkeleton();
 
   arrA waypoints;
+  uintA steps_per_phase = {};
+  
   if(bound==BD_seqPath || bound==BD_seqVelPath) {
     CHECK(komoProblem(BD_seq), "BD_seq needs to be computed before");
     waypoints = komoProblem(BD_seq)->getPath_qAll();
+    if (waypoints_from_service){   
+      RaRhhLgp rg_service;
+      arrA extended_waypoints;
+      uintA extended_steps;
+      uint ind = 0;
+      for(uint i=0; i<(waypoints.N-1); i++) {       
+        extended_waypoints.setAppend(waypoints(i));
+        arrA rg_waypoints = rg_service.query_rgraph_path(waypoints(i),waypoints(i+1));
+        if (rg_waypoints.N) {        
+          
+          for(uint j=0; j<rg_waypoints.N; j++) {
+            rai::Configuration C_ = startKinematics;
+            rai::Frame *f = C_.addFrame("waypoint");
+            f->setPosition({rg_waypoints(j)});         
+            
+            KOMO ik_komo;
+            ik_komo.verbose = 0;
+            ik_komo.setModel(C_);
+            ik_komo.setIKOpt();
+            ik_komo.add_collision(true);
+            ik_komo.addObjective({}, FS_positionDiff, {"pr2R", "waypoint"}, OT_eq, {1e1});
+            ik_komo.optimize();
+            // cout << "IK: "<<ik_komo.x << endl;
+            arr tmp_pose = ik_komo.x;
+            ind += 1;
+            // add obj joints so that the graph's waypoints have the same dofs with the switch waypoints
+            for(uint k=10; k<(waypoints(i).N); k++) {
+              tmp_pose.setAppend(waypoints(i)(k));
+            }       
+            extended_waypoints.setAppend(tmp_pose);
+          }
+          extended_steps.append(rg_waypoints.N);
+        }
+      }
+      extended_waypoints.setAppend(waypoints(waypoints.N-1));
+      waypoints = extended_waypoints;
+      steps_per_phase = extended_steps;
+
+      cout <<"Got extended waypoints, full waypoints' length: "<< waypoints.N<<endl;      
+    }
   }
 
   auto comp = skeleton2Bound(komo, bound, S,
                              startKinematics,
                              collisions,
-                             waypoints);
+                             waypoints,steps_per_phase);
 
   CHECK(comp, "no compute object returned");
 

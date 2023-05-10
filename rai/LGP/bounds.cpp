@@ -30,7 +30,7 @@ rai::Array<SkeletonSymbol> modes = { SY_stable, SY_stableOn, SY_dynamic, SY_dyna
 
 ptr<ComputeObject> skeleton2Bound(ptr<KOMO>& komo, BoundType boundType, const Skeleton& S,
                                   const rai::Configuration& startKinematics,
-                                  bool collisions, const arrA& waypoints) {
+                                  bool collisions, const arrA& waypoints, uintA waypointsStepsForPhases) {
 
   if(boundType==BD_pose)
     return make_shared<PoseBound>(komo, S, startKinematics, collisions);
@@ -42,7 +42,7 @@ ptr<ComputeObject> skeleton2Bound(ptr<KOMO>& komo, BoundType boundType, const Sk
     return make_shared<PathBound>(komo, S, startKinematics, collisions);
 
   if(boundType==BD_seqPath)
-    return make_shared<SeqPathBound>(komo, S, startKinematics, collisions, waypoints);
+    return make_shared<SeqPathBound>(komo, S, startKinematics, collisions, waypoints,waypointsStepsForPhases);
 
   if(boundType==BD_seqVelPath)
     return make_shared<SeqVelPathBound>(komo, S, startKinematics, collisions, waypoints);
@@ -211,7 +211,7 @@ PathBound::PathBound(ptr<KOMO>& komo,
 
 SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
                            const Skeleton& S, const rai::Configuration& startKinematics,
-                           bool collisions, const arrA& waypoints)
+                           bool collisions, const arrA& waypoints, uintA waypointsStepsForPhases)
   : KOMO_based_bound(komo) {
 
   double maxPhase = getMaxPhase(S);
@@ -234,8 +234,9 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
 #endif
 
   uint T = floor(maxPhase+.5);
-  uint waypointsStepsPerPhase = waypoints.N/(T+1);
-  CHECK_EQ(waypoints.N, waypointsStepsPerPhase * (T+1), "waypoint steps not clear");
+  // uint waypointsStepsPerPhase = waypoints.N/(T+1);
+  if (!waypointsStepsForPhases.N) for(uint i=0; i<maxPhase+1; i++) waypointsStepsForPhases.append(0);
+
 #if 0 //impose waypoint costs?
   for(uint i=0; i<waypoints.N-1; i++) {
     komo->addObjective(ARR(conv_step2time(i, waypointsStepsPerPhase)), FS_qItself, {}, OT_sos, {1e-1}, waypoints(i));
@@ -251,7 +252,7 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   if(collisions) komo->add_collision(true, 0., 1e1);
 
   komo->run_prepare(.01);
-  komo->initWithWaypoints(waypoints, waypointsStepsPerPhase);
+  komo->initWithWaypoints(maxPhase, waypoints, waypointsStepsForPhases);
   //      cout <<komo->getPath_times() <<endl;
 
 }
@@ -287,7 +288,7 @@ SeqVelPathBound::SeqVelPathBound(ptr<KOMO>& komo,
   if(collisions) komo->add_collision(true, 0, 1e1);
 
   komo->run_prepare(.01);
-  komo->initWithWaypoints(waypoints, false);
+  komo->initWithWaypoints(getMaxPhase(S),waypoints, {},false);
   //      cout <<komo->getPath_times() <<endl;
 
 }

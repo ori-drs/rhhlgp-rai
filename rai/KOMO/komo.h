@@ -245,7 +245,7 @@ public:
   void setConfiguration_qOrg(int t, const arr& q); ///< set only those DOFs that were defined in the original world (excluding extra DOFs from switches)
   void setConfiguration_X(int t, const arr& X); ///< t<0 allows to set the prefix configurations; while 0 <= t < T allows to set all other initial configurations
   void initWithConstant(const arr& q); ///< set all configurations EXCEPT the prefix to a particular state
-  void initWithWaypoints(const arrA& waypoints, uint waypointStepsPerPhase=1, bool sineProfile=true); ///< set all configurations (EXCEPT prefix) to interpolate given waypoints
+  void initWithWaypoints(const uint number_of_phases, const arrA& waypoints, uintA waypointStepsPerPhase={}, bool sineProfile=true); ///< set all configurations (EXCEPT prefix) to interpolate given waypoints
   void updateAndShiftPrefix(const rai::Configuration& C){
     //-- joint state
     //set t=0 to new joint state:
