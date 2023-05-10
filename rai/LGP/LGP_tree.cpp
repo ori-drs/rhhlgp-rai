@@ -504,8 +504,10 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
   LGP_Node* n = popBest(drawFringe, drawFrom);
   if(n && !n->count(bound)) {
     try {
+      bool extend_waypoints = true;
+      if (!rgraph_heuristic) extend_waypoints = false;
     	// optBound is the classic and unchanged implementation
-      n->optBound(bound, collisions, verbose-2, true);
+      n->optBound(bound, collisions, verbose-2, extend_waypoints);
     } catch(const char* err) {
       LOG(-1) <<"opt(level=" <<bound <<") has failed for the following node:";
       n->write(cout, false, true);

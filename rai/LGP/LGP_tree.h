@@ -52,6 +52,7 @@ struct LGP_Tree : GLDrawer {
   FOL_World fol;
   rai::Configuration kin;
   rai::ConfigurationViewer V;
+  bool rgraph_heuristic = false;
 
   KOMO finalGeometryObjectives;
 
