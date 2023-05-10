@@ -825,23 +825,34 @@ void KOMO::initWithConstant(const arr& q) {
   run_prepare(0.);
 }
 
-void KOMO::initWithWaypoints(const arrA& waypoints, uint waypointStepsPerPhase, bool sineProfile) {
+void KOMO::initWithWaypoints(const uint number_of_phases, const arrA& waypoints, uintA waypointStepsPerPhase, bool sineProfile) {
   //compute in which steps (configuration time slices) the waypoints are imposed
-  uintA steps(waypoints.N);
+
+  uintA steps(number_of_phases + 1);
   for(uint i=0; i<steps.N; i++) {
-    steps(i) = conv_time2step(conv_step2time(i, waypointStepsPerPhase), stepsPerPhase);
+    steps(i) = conv_time2step(conv_step2time(i, 1), stepsPerPhase);
   }
 
 	//view(true, STRING("before"));
 
-  //first set the path piece-wise CONSTANT at waypoints and the subsequent steps (each waypoint may have different dimension!...)
 #ifndef KOMO_MIMIC_STABLE //depends on sw->isStable -> mimic !!
+  uint waypoint_ind = 0;
+  uint incremental_step;
+  uint override_ind = 0;
   for(uint i=0; i<steps.N; i++) {
+    uint Tstart = steps(i);
+    // distribute waypoints over stepPerPhases
+    if (i!=steps.N-1) incremental_step = ceil(stepsPerPhase/(double)(waypointStepsPerPhase(i)+1)); //waypointStepsPerPhase defines the number of steps in between switches (not including switches)
+    else incremental_step = 1;
     uint Tstop=T;
     if(i+1<steps.N && steps(i+1)<T) Tstop=steps(i+1);
     for(uint t=steps(i); t<Tstop; t++) {
-      setConfiguration_qAll(t, waypoints(i));
+      setConfiguration_qAll(t, waypoints(waypoint_ind));
+      if (incremental_step==0 || (t!=steps(i) && (t-Tstart)%incremental_step==0)) 
+        waypoint_ind +=1;
     }
+    if (i<waypointStepsPerPhase.N) override_ind += waypointStepsPerPhase(i)+1; // dispose remaining waypoints if not evenly spaced and skip to the next switch's waypoint
+    waypoint_ind = override_ind;
   }
 #else
   for(uint i=0; i<steps.N; i++) {

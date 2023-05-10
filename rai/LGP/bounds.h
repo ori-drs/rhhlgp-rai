@@ -55,7 +55,7 @@ struct SeqPathBound : KOMO_based_bound {
   SeqPathBound(ptr<KOMO>& komo, //TODO: eventually remove this!
                const Skeleton& S,
                const rai::Configuration& startKinematics,
-               bool collisions, const arrA& waypoints);
+               bool collisions, const arrA& waypoints, uintA waypointsStepsForPhases);
 };
 
 //===========================================================================
@@ -85,7 +85,7 @@ ptr<ComputeObject> skeleton2Bound(ptr<KOMO>& komo,
                                   const Skeleton& S,
                                   const rai::Configuration& startKinematics,
                                   bool collisions,
-                                  const arrA& waypoints= {}
+                                  const arrA& waypoints= {}, uintA waypointsStepsForPhases={}
                                  );
 
 struct SubCG {

@@ -505,7 +505,7 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
   if(n && !n->count(bound)) {
     try {
     	// optBound is the classic and unchanged implementation
-      n->optBound(bound, collisions, verbose-2);
+      n->optBound(bound, collisions, verbose-2, true);
     } catch(const char* err) {
       LOG(-1) <<"opt(level=" <<bound <<") has failed for the following node:";
       n->write(cout, false, true);
