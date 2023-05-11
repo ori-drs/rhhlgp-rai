@@ -694,16 +694,59 @@ rai::String LGP_Tree::report_csv() {
   rai::String out;
   LGP_Node* bpose = getBest(terminals, 1);
   LGP_Node* bseq  = getBest(terminals, 2);
-  LGP_Node* bpath = getBest(fringe_solved, 3);
+  LGP_Node* bpath = getBest(fringe_solved, BD_seqPath);
+  double base_footrpint_path_length = 0;
 
-  out << "TIME " << "TREE " << "POSE " << "SEQ " << "EXPANDED " << "\n";//<< "PATH " << "bestPose " << "bestSeq "<< "bestPath " << "#solutions " << "\n";
+  if (bpath){
+    int num_frames = bpath->komoProblem(BD_seqPath)->pathConfig.frames.N;
+    uintA base_footprint_indices = {};
+    uint bf_index = 0;
+    for (int i = 0; i < num_frames; ++i) {
+      if (bpath->komoProblem(BD_seqPath)->pathConfig.frames(i)->name == "base_footprint") {
+        bf_index = i;
+        base_footprint_indices.append(bf_index);
+      }
+    }
+    arr base_foortprint_poses = bpath->komoProblem(BD_seqPath)->pathConfig.getFrameState(base_footprint_indices);    
+    int numel = static_cast<int>(base_foortprint_poses.N / 7);
+    for (int i = 1; i < numel; ++i) {
+      base_footrpint_path_length += sqrt(pow((base_foortprint_poses(i, 0) - base_foortprint_poses(i-1, 0)),2) + pow((base_foortprint_poses(i, 1) - base_foortprint_poses(i-1, 1)),2));
+    }
+    cout << "BF path length: " << base_footrpint_path_length << endl;
+  }  
+  else cout << "No best node" << endl;
+
+  double wtr_path_length = 0;
+
+  if (bpath){
+    int num_frames = bpath->komoProblem(BD_seqPath)->pathConfig.frames.N;
+    uintA wtr_indices = {};
+    uint wtr_index = 0;
+    for (int i = 0; i < num_frames; ++i) {
+      if (bpath->komoProblem(BD_seqPath)->pathConfig.frames(i)->name == "worldTranslationRotation") {
+        wtr_index = i;
+        wtr_indices.append(wtr_index);
+      }
+    }
+    arr wtr_poses = bpath->komoProblem(BD_seqPath)->pathConfig.getFrameState(wtr_indices);    
+    int numel = static_cast<int>(wtr_poses.N / 7);
+    for (int i = 1; i < numel; ++i) {
+      wtr_path_length += sqrt(pow((wtr_poses(i, 0) - wtr_poses(i-1, 0)),2) + pow((wtr_poses(i, 1) - wtr_poses(i-1, 1)),2));
+    }
+    cout << "WTR path length: "<< wtr_path_length << endl;
+  }  
+  else cout << "No best node" << endl;
+
+  out << "TIME " << "TREE " << "POSE " << "SEQ " << "EXPANDED " << "BASE_PATH_LENGTH " << "WTR_PATH_LENGTH " << "\n";//<< "PATH " << "bestPose " << "bestSeq "<< "bestPath " << "#solutions " << "\n";
   csv_file << out;
   out.clear();
   out <<rai::cpuTime() 
       <<" " <<COUNT_node
       <<" " <<COUNT_opt(BD_pose) 
       <<" " <<COUNT_opt(BD_seq)
-      <<" " <<numSteps;
+      <<" " <<numSteps - 1
+      <<" " <<base_footrpint_path_length
+      <<" " <<wtr_path_length;
       // <<" " <<COUNT_opt(BD_path)+COUNT_opt(BD_seqPath)
       // <<" " <<(bpose?bpose->cost(1):100.)
       // <<" " <<(bseq ?bseq ->cost(2):100.)
