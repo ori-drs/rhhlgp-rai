@@ -625,6 +625,11 @@ void LGP_Tree::step() {
 			if (focusNode->komoProblem(BD_seqPath)) bound = BD_seqPath;
 			else if(focusNode->komoProblem(BD_path)) bound = BD_path;
 			else HALT("NO KOMO FOUND");
+      if(write_csv){
+        csv_file.open("data.csv");
+        report_csv();
+        csv_file.close();
+      }
 			focusNode->komoProblem(bound)->view(true, "optimized motion");
 			focusNode->komoProblem(bound)->view_play(true); 				//< press q to continue after video was displayed
     }
@@ -771,11 +776,7 @@ void LGP_Tree::run(uint steps) {
     if(COUNT_time>stopTime) break;
   }
 
-  if(write_csv){
-    csv_file.open("data.csv");
-    report_csv();
-    csv_file.close();
-  }
+  
   if(verbose>0) report(true);
 
   //basic output
