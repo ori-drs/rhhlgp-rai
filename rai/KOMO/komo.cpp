@@ -770,6 +770,12 @@ arr KOMO::getPath_X() {
   return X;
 }
 
+arrA KOMO::getPath_X_pos(rai::String frame_name) {
+  arrA q(T);
+  for(uint t=0; t<T; t++) q(t) = pathConfig.getFrameState_pos(timeSlices[k_order+t], frame_name);
+  return q;
+}
+
 arrA KOMO::getPath_qAll() {
   arrA q(T);
   for(uint t=0; t<T; t++) q(t) = getConfiguration_qAll(t);

@@ -518,6 +518,20 @@ arr Configuration::getFrameState(const FrameL& F) const {
   return X;
 }
 
+arr Configuration::getFrameState_pos(const FrameL& F, const rai::String frame_name) const {
+  arr X_pos(3);
+  arr X(F.N, 7);
+  for(uint i=0; i<X.d0; i++) {
+    rai::String name_ = F.elem(i)->name;
+    if (name_== frame_name) {
+      X[i]= F.elem(i)->ensure_X().getArr7d(); 
+      for(uint j=0; j<3; j++) X_pos(j) = X[i](j);
+      // cout << X_pos<<endl;
+    }
+  }
+  return X_pos;
+}
+
 /// set the q-vector (all joint and force DOFs)
 void Configuration::setJointState(const arr& _q) {
   setJointStateCount++; //global counter

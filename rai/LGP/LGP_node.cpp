@@ -140,14 +140,20 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
   if(bound==BD_seqPath || bound==BD_seqVelPath) {
     CHECK(komoProblem(BD_seq), "BD_seq needs to be computed before");
     waypoints = komoProblem(BD_seq)->getPath_qAll();
+    rai::String ee_name = "pr2R";
+    arrA cart_waypoints = (komoProblem(BD_seq)->getPath_X_pos(ee_name));
+    LGP_NodeL path = getTreePath();
+    RaRhhLgp rg_service;
     if (waypoints_from_service){   
-      RaRhhLgp rg_service;
       arrA extended_waypoints;
       uintA extended_steps;
-      uint ind = 0;
-      for(uint i=0; i<(waypoints.N-1); i++) {       
+      uint i=0;
+      for(LGP_Node* b : path) {
+      
+      // for(uint i=0; i<(waypoints.N-1); i++) {       
         extended_waypoints.setAppend(waypoints(i));
-        arrA rg_waypoints = rg_service.query_rgraph_path(waypoints(i),waypoints(i+1));
+        arrA rg_waypoints = rg_service.query_rgraph_path(cart_waypoints(i),cart_waypoints(i+1));
+        
         if (rg_waypoints.N) {        
           
           for(uint j=0; j<rg_waypoints.N; j++) {
@@ -164,21 +170,22 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
             ik_komo.optimize();
             // cout << "IK: "<<ik_komo.x << endl;
             arr tmp_pose = ik_komo.x;
-            ind += 1;
             // add obj joints so that the graph's waypoints have the same dofs with the switch waypoints
-            for(uint k=10; k<(waypoints(i).N); k++) {
+            for(uint k=tmp_pose.N; k<(waypoints(i).N); k++) {
               tmp_pose.setAppend(waypoints(i)(k));
             }       
             extended_waypoints.setAppend(tmp_pose);
           }
           extended_steps.append(rg_waypoints.N);
         }
+        i+=1;
+        if (i == waypoints.N-1) break;
       }
       extended_waypoints.setAppend(waypoints(waypoints.N-1));
       waypoints = extended_waypoints;
       steps_per_phase = extended_steps;
 
-      cout <<"Got extended waypoints, full waypoints' length: "<< waypoints.N<<endl;      
+      cout <<"Full waypoints' length: "<< waypoints.N<<endl;      
     }
   }
 
