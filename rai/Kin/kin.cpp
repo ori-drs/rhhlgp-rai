@@ -503,8 +503,11 @@ arr Configuration::getJointState(const FrameL& joints) const {
         for(uint ii=0; ii<j->dim; ii++) x(nd+ii) = qInactive(j->qIndex+ii);
       }
       nd += j->dim;
+      // cout << f->name << " dim: "<< j->dim<<endl;
+
     }
   }
+  // cout << "nd: "<<nd <<endl;
   CHECK_EQ(nd, x.N, "");
   return x;
 }
