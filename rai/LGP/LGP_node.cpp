@@ -140,22 +140,20 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
   if(bound==BD_seqPath || bound==BD_seqVelPath) {
     CHECK(komoProblem(BD_seq), "BD_seq needs to be computed before");
     waypoints = komoProblem(BD_seq)->getPath_qAll();
-    rai::String ee_name = "pr2R";
+    rai::String ee_name = "hsrG";
     arrA cart_waypoints = (komoProblem(BD_seq)->getPath_X_pos(ee_name));
+    cout <<"get path x: " << (komoProblem(BD_seq)->getPath_X_pos(ee_name))<<endl;
     LGP_NodeL path = getTreePath();
     RaRhhLgp rg_service;
     if (waypoints_from_service){   
       arrA extended_waypoints;
       uintA extended_steps;
       uint i=0;
-      for(LGP_Node* b : path) {
-      
-      // for(uint i=0; i<(waypoints.N-1); i++) {       
+      for(LGP_Node* b : path) {      
         extended_waypoints.setAppend(waypoints(i));
         arrA rg_waypoints = rg_service.query_rgraph_path(cart_waypoints(i),cart_waypoints(i+1));
-        
+        cout << "rg_waypoints: " << rg_waypoints << endl;
         if (rg_waypoints.N) {        
-          
           for(uint j=0; j<rg_waypoints.N; j++) {
             rai::Configuration C_ = startKinematics;
             rai::Frame *f = C_.addFrame("waypoint");
@@ -165,19 +163,22 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
             ik_komo.verbose = 0;
             ik_komo.setModel(C_);
             ik_komo.setIKOpt();
-            ik_komo.add_collision(true);
-            ik_komo.addObjective({}, FS_positionDiff, {"pr2R", "waypoint"}, OT_eq, {1e1});
+            ik_komo.add_collision(true, 0, 1e2);
+            ik_komo.addObjective({}, FS_positionDiff, {"worldTranslationRotation", "waypoint"}, OT_eq, {1e3});
             ik_komo.optimize();
-            // cout << "IK: "<<ik_komo.x << endl;
-            arr tmp_pose = ik_komo.x;
+
+            cout << "IK: "<<ik_komo.x << endl;
+            arr tmp_pose = {0, 0, 0, 0, 0,  rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2)};  
             // add obj joints so that the graph's waypoints have the same dofs with the switch waypoints
             for(uint k=tmp_pose.N; k<(waypoints(i).N); k++) {
               tmp_pose.setAppend(waypoints(i)(k));
             }       
+            cout <<tmp_pose << endl;
             extended_waypoints.setAppend(tmp_pose);
           }
-          extended_steps.append(rg_waypoints.N);
         }
+
+        extended_steps.append(rg_waypoints.N);
         i+=1;
         if (i == waypoints.N-1) break;
       }
