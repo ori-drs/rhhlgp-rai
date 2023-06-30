@@ -695,6 +695,7 @@ void KOMO::setSkeleton(const Skeleton& S, rai::ArgWord sequenceOrPath){
 void KOMO::add_collision(bool hardConstraint, double margin, double prec) {
   if(hardConstraint) { //interpreted as hard constraint (default)
     addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"ALL"}, OT_eq, {prec}, NoArr);
+    addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"obj0", "obj1", "obj2"}, OT_eq, {prec}, NoArr);
   } else { //cost term
     addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"ALL"}, OT_sos, {prec}, NoArr);
   }
