@@ -292,24 +292,24 @@ arr GravityCompensation::generateTaskMapFeature(TM_Default map, arr Q) {
   return phiTemp;
 }
 
-void GravityCompensation::testForLimits() {
-  arr q;
-  q << FILE(rai::raiPath("examples/pr2/calibrateControl/logData/gcKugel_05_09_16/q"));
-  //bool limitViolation = false;
-  uint j = 0;
-  for(uint i = 0; i < q.d0; i++) {
-    world.setJointState(q[i]);
-    F_qLimits limits; //(0.03);
-    arr y;
-    limits.phi(y, NoArr, world);
-    if(y(0) > 0) {
-      cout << i << " " << y<< endl;
-      j++;
-    }
-  }
-  cout << j << endl;
+// void GravityCompensation::testForLimits() {
+//   arr q;
+//   q << FILE(rai::raiPath("examples/pr2/calibrateControl/logData/gcKugel_05_09_16/q"));
+//   //bool limitViolation = false;
+//   uint j = 0;
+//   for(uint i = 0; i < q.d0; i++) {
+//     world.setJointState(q[i]);
+//     F_qLimits limits; //(0.03);
+//     arr y;
+//     limits.phi2(y, NoArr, world);
+//     if(y(0) > 0) {
+//       cout << i << " " << y<< endl;
+//       j++;
+//     }
+//   }
+//   cout << j << endl;
 
-}
+// }
 
 void GravityCompensation::removeLimits() {
   arr q;
@@ -321,17 +321,17 @@ void GravityCompensation::removeLimits() {
 
   arr qNew, uNew, qSignNew;
 
-  for(uint i = 0; i < q.d0; i++) {
-    world.setJointState(q[i]);
-    F_qLimits limits;
-    arr y;
-    limits.phi(y, NoArr, world);
-    if(y(0) <= 0) {
-      qNew.append(~q[i]);
-      qSignNew.append(~qSign[i]);
-      uNew.append(~u[i]);
-    }
-  }
+  // for(uint i = 0; i < q.d0; i++) {
+  //   world.setJointState(q[i]);
+  //   F_qLimits limits;
+  //   arr y;
+  //   limits.phi2(y, NoArr, world);
+  //   if(y(0) <= 0) {
+  //     qNew.append(~q[i]);
+  //     qSignNew.append(~qSign[i]);
+  //     uNew.append(~u[i]);
+  //   }
+  // }
   FILE(rai::raiPath("examples/pr2/calibrateControl/logData/gcKugel_LW/q")) << qNew;
   FILE(rai::raiPath("examples/pr2/calibrateControl/logData/gcKugel_LW/qSign")) << qSignNew;
   FILE(rai::raiPath("examples/pr2/calibrateControl/logData/gcKugel_LW/u")) << uNew;

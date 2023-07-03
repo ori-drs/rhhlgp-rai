@@ -46,12 +46,8 @@ struct F_qLimits2 : Feature {
 //===========================================================================
 
 struct F_qLimits : Feature {
-  //TODO (danny) allow margin specification
-  arr limits;
-
-  F_qLimits(const arr& _limits=NoArr) { if(!!_limits) limits=_limits; } ///< if no limits are provided, they are taken from G's joints' attributes on the first call of phi
-  virtual void phi(arr& y, arr& J, const rai::Configuration& G);
-  virtual uint dim_phi(const rai::Configuration& G) { return 1; }
+  virtual void phi2(arr& y, arr& J, const FrameL& F);
+  virtual uint dim_phi2(const FrameL& F);
 };
 
 //===========================================================================

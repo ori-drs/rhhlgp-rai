@@ -286,12 +286,56 @@ uint F_qLimits2::dim_phi2(const FrameL& F) {
   return m;
 }
 
-//===========================================================================
+DofL getDofs(const FrameL& F){
+  DofL dofs;
+  for(rai::Frame *f: F){
+    if(f->joint && f->joint->active){
+      if(f->joint->limits.N) dofs.append(f->joint);
+    }
+    // for(rai::ForceExchange* fex:f->forces) if(&fex->a==f){
+    //   if(fex->active && fex->limits.N) dofs.append(fex);
+    // }
+  }
+  return dofs;
+}
 
-void F_qLimits::phi(arr& y, arr& J, const rai::Configuration& G) {
-//  if(!limits.N)
-  limits=G.getLimits(); //G might change joint ordering (kinematic switches), need to query limits every time
-  NIY//G.kinematicsLimits(y, J, limits);
+//===========================================================================
+void F_qLimits::phi2(arr& y, arr& J, const FrameL& F){
+  uint M = dim_phi2(F);
+  F.last()->C.kinematicsZero(y, J, M);
+  CHECK(F.last()->C._state_q_isGood, "");
+  uint m=0;
+  DofL dofs = getDofs(F);
+  for(rai::Dof* dof: dofs) if(dof->limits.N){
+    for(uint k=0; k<dof->dim; k++) { //in case joint has multiple dimensions
+      double lo = dof->limits(2*k+0);
+      double up = dof->limits(2*k+1);
+      if(up>=lo){
+        uint i = dof->qIndex+k;
+        double qi = F.last()->C.q(i);
+//        if(true){
+//          if(qi < lo) LOG(0) <<dof->name() <<' ' <<k <<' ' <<qi <<'<' <<lo <<" violates lower limit";
+//          if(qi > up) LOG(0) <<dof->name() <<' ' <<k <<' ' <<qi <<'>' <<up <<" violates upper limit";
+//        }
+        y.elem(m) = lo - qi;
+        if(!!J) J.elem(m, i) -= 1.;
+        m++;
+        y.elem(m) = qi - up;
+        if(!!J) J.elem(m, i) += 1.;
+        m++;
+      }else{
+        m+=2;
+      }
+    }
+  }
+  CHECK_EQ(m, M, "");
+}
+
+uint F_qLimits::dim_phi2(const FrameL& F) {
+  uint m=0;
+  DofL dofs = getDofs(F);
+  for(rai::Dof* dof: dofs) if(dof->limits.N) m += 2*dof->dim;
+  return m;
 }
 
 //===========================================================================

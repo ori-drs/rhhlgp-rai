@@ -201,7 +201,7 @@ struct KOMO : NonCopyable {
   void addSquaredQuaternionNorms(const arr& times=NoArr, double scale=3e0);
 
   void add_collision(bool hardConstraint, double margin=.0, double prec=1e1);
-  void add_jointLimits(bool hardConstraint, double margin=.05, double prec=1.);
+  void add_jointLimits(bool hardConstraint=true, double margin=.0, double prec=1.);
   void setLiftDownUp(double time, const char* endeff, double timeToLift=.15);
   void setSlow(double startTime, double endTime, double prec=1e1, bool hardConstrained=false);
   void setSlowAround(double time, double delta, double prec=1e1, bool hardConstrained=false);
