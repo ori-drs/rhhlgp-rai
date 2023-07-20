@@ -38,6 +38,7 @@ enum FeatureSymbol {
   FS_scalarProductYZ,
   FS_scalarProductZZ,
   FS_gazeAt,
+  FS_locomoteAlongXAt,
 
   FS_angularVel,
 
