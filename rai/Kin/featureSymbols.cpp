@@ -158,7 +158,10 @@ ptr<Feature> symbols2feature(FeatureSymbol feat, const StringA& frames, const ra
     f=make_shared<F_PositionRel>();
     f->scale = arr({2,3}, {1., 0., 0., 0., 1., 0.}); //pick the xy- coordinated
   }
-
+  else if(feat==FS_locomoteAlongXAt) {
+    f=make_shared<F_PositionDiff>();
+    f->scale = arr({2,3}, {1., 0., 0., 0., 0., 0.}); //pick the xy- coordinated
+  }
   else if(feat==FS_angularVel) { f=make_shared<F_AngVel>(); }
 
   else if(feat==FS_accumulatedCollisions) {
