@@ -40,6 +40,8 @@ template<> const char* rai::Enum<FeatureSymbol>::names []= {
   "scalarProductYZ",
   "scalarProductZZ",
   "gazeAt",
+  "locomoteAlongXAt",
+  "locomote",
 
   "angularVel",
 
