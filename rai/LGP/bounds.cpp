@@ -140,6 +140,7 @@ PoseBound::PoseBound(ptr<KOMO>& komo,
 
 
   if(collisions) komo->add_collision(false);
+  komo->add_jointLimits(true);
 
   komo->run_prepare(.01);
   //      komo->setPairedTimes();
@@ -169,6 +170,9 @@ SeqBound::SeqBound(ptr<KOMO>& komo,
   komo->setSkeleton(S);
 
   if(collisions) komo->add_collision(true);
+  komo->add_jointLimits(true);
+  
+  std::cout << "seq bound" << "\n";
 
   komo->run_prepare(.01);
 //      komo->setPairedTimes();
@@ -187,7 +191,7 @@ PathBound::PathBound(ptr<KOMO>& komo,
   komo->setModel(startKinematics, collisions);
   uint stepsPerPhase = rai::getParameter<uint>("LGP/stepsPerPhase", 10);
   uint pathOrder = rai::getParameter<uint>("LGP/pathOrder", 2);
-  komo->setTiming(maxPhase+.5, stepsPerPhase, 10., pathOrder);
+  komo->setTiming(maxPhase+1.0, stepsPerPhase, 10., pathOrder);
   komo->animateOptimization = 0;
 
   komo->addSquaredQuaternionNorms();
@@ -203,6 +207,9 @@ PathBound::PathBound(ptr<KOMO>& komo,
   komo->setSkeleton(S);
 
   if(collisions) komo->add_collision(true, 0., 1e1);
+  komo->add_jointLimits(true);
+  std::cout << "opt path bound" << "\n";
+
 
   komo->run_prepare(.01);
   //      cout <<komo->getPath_times() <<endl;
@@ -220,7 +227,7 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   komo->setModel(startKinematics, collisions);
   uint stepsPerPhase = rai::getParameter<uint>("LGP/stepsPerPhase", 10);
   uint pathOrder = rai::getParameter<uint>("LGP/pathOrder", 2);
-  komo->setTiming(maxPhase+.5, stepsPerPhase, 10., pathOrder);
+  komo->setTiming(maxPhase+1.0, stepsPerPhase, 10., pathOrder);
   komo->animateOptimization = 0;
 
   komo->addSquaredQuaternionNorms();
@@ -249,6 +256,9 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   //      komo->objectives.resizeCopy(O);
 
   if(collisions) komo->add_collision(true, 0., 1e1);
+  komo->add_jointLimits(true);
+  std::cout << "seq path bound" << "\n";
+
 
   komo->run_prepare(.01);
   komo->initWithWaypoints(waypoints, waypointsStepsPerPhase);
