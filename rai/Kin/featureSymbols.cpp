@@ -91,6 +91,14 @@ double shapeSize(const rai::Configuration& K, const char* name, uint i=2) {
   return s->size(i);
 }
 
+double shapeSizeTargetObject(const rai::Configuration& K, const char* name, uint i=2) {
+  rai::Frame* f = K.getFrame(name);
+  rai::Frame* f1 = K.getFrame("handle");
+  rai::Shape* s = f->shape;
+  return f->getPosition().elem(2);
+}
+
+
 ptr<Feature> symbols2feature(FeatureSymbol feat, const StringA& frames, const rai::Configuration& C, const arr& scale, const arr& target, int order) {
   shared_ptr<Feature> f;
   if(feat==FS_distance) {  f=make_shared<F_PairCollision>(F_PairCollision::_negScalar, false); }
