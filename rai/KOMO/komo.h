@@ -30,6 +30,9 @@ enum SkeletonSymbol {
 
   //geometric:
   SY_touch,
+  SY_graspTop,
+  SY_locomote,
+  SY_lift,
   SY_above,
   SY_inside,
   SY_oppose,
@@ -87,7 +90,7 @@ enum SkeletonSymbol {
   SY_touchBoxNormalZ,
 
   SY_end,
-
+  SY_moveGripper
 };
 
 struct SkeletonEntry {
