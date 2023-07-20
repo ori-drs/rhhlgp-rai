@@ -112,7 +112,7 @@ LGP_Tree::LGP_Tree()
   if(!filNodes) filNodes = new ofstream(dataPath + "nodes");
 
   collisions = rai::getParameter<bool>("LGP/collisions", true);
-  displayTree = rai::getParameter<bool>("LGP/displayTree", false);
+  displayTree = rai::getParameter<bool>("LGP/displayTree", true);
 
   verbose = rai::getParameter<double>("LGP/verbose", 2);
   if(verbose>0) fil.open(dataPath + "optLGP.dat"); //STRING("z.optLGP." <<rai::date() <<".dat"));
@@ -605,6 +605,7 @@ void LGP_Tree::reportEffectiveJoints() {
 }
 
 void LGP_Tree::step() {
+  std::cout << "step " << "\n";
   expandNext();
 
   uint numSol = fringe_solved.N;
@@ -696,7 +697,9 @@ void LGP_Tree::run(uint steps) {
 
   for(uint k=0; k<steps; k++) {
     step();
-
+    displayTreeUsingDot();
+    std::cout << "here inside " << "\n";
+    
     if(fringe_solved.N>=stopSol) break;
     if(COUNT_time>stopTime) break;
   }
