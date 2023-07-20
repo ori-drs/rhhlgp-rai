@@ -206,11 +206,12 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
     constraints_here = komo->ineq + komo->eq;
   }
 
-  bool feas = (constraints_here<2.5);
+  bool feas = (bound==BD_seqPath) ? (constraints_here<2.5) : (constraints_here<2.5);
+  // bool feas = (bound==BD_seqPath) ? (constraints_here<0.5) : (constraints_here<0.5);
 
-  if(komo->verbose>0) {
+  // if(komo->verbose>0) {
     cout <<"  RESULTS: cost: " <<cost_here <<" constraints: " <<constraints_here <<" feasible: " <<feas <<endl;
-  }
+  // }
 
   //-- post process komo problem for level==1
   if(bound==BD_pose) {
