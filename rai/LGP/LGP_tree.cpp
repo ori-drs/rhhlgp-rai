@@ -607,8 +607,7 @@ void LGP_Tree::reportEffectiveJoints() {
 }
 
 void LGP_Tree::step() {
-  expandNext();
-
+  if(fringe_expand.N) expandNext();
   uint numSol = fringe_solved.N;
 
   // optBest with our bounds
