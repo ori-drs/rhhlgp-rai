@@ -196,11 +196,13 @@ void LGP_Tree::displayTreeUsingDot() {
 
   Graph dot=root->getGraph(false);
   dot.writeDot(FILE("z.dot"));
-  rai::system("dot -Tpdf z.dot > z.pdf");
-  if(firstTimeDisplayTree) {
-    rai::system("evince z.pdf &");
-    firstTimeDisplayTree=false;
-  }
+  rai::String file_;
+  file_ <<"dot -Tpdf z.dot > tree_search/z"<<numSteps<<".pdf";
+  rai::system(file_);
+  // if(firstTimeDisplayTree) {
+  //   rai::system("evince z.pdf &");
+  //   firstTimeDisplayTree=false;
+  // }
 }
 
 void LGP_Tree::updateDisplay() {
