@@ -628,6 +628,9 @@ void LGP_Tree::step() {
 			else HALT("NO KOMO FOUND");
       if(write_csv){
         csv_file.open("data.csv");
+        // Save final result to csv file
+        cout<< "Saving result to csv file.."<<endl;
+        csv_file.open("data.csv", std::ios::out | std::ios::app);
         report_csv();
         csv_file.close();
       }
@@ -746,7 +749,7 @@ rai::String LGP_Tree::report_csv() {
   out << "TIME " << "TREE " << "POSE " << "SEQ " << "EXPANDED " << "BASE_PATH_LENGTH " << "WTR_PATH_LENGTH " << "\n";//<< "PATH " << "bestPose " << "bestSeq "<< "bestPath " << "#solutions " << "\n";
   csv_file << out;
   out.clear();
-  out <<rai::cpuTime() 
+  out <<" \n" <<rai::cpuTime() 
       <<" " <<COUNT_node
       <<" " <<COUNT_opt(BD_pose) 
       <<" " <<COUNT_opt(BD_seq)

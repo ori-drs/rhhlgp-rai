@@ -37,7 +37,7 @@ struct LGP_Tree_SolutionData : GLDrawer {
 struct LGP_Tree : GLDrawer {
   int verbose;
   bool write_csv = true;
-  std::ofstream csv_file;
+  std::fstream csv_file;
   uint numSteps;
   ofstream fil;
   bool displayTree=true;
