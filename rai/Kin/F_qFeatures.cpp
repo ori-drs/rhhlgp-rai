@@ -340,6 +340,48 @@ uint F_qLimits::dim_phi2(const FrameL& F) {
 
 //===========================================================================
 
+  // void phi2(arr& y, arr& J, const FrameL& F) {
+  //   uint M = dim_phi2(F);
+  //   F.last()->C.kinematicsZero(y, J, M);
+  //   CHECK(F.last()->C._state_q_isGood, "");
+  //   uint m = 0;
+  //   DofL dofs = getDofs(F);
+  //   for (rai::Dof* dof : dofs) {
+  //     if (dof->torqueLimits.N) {
+  //       for (uint k = 0; k < dof->dim; k++) { // in case joint has multiple dimensions
+  //         double lo = dof->torqueLimits(2 * k);
+  //         double up = dof->torqueLimits(2 * k + 1);
+  //         if (up >= lo) {
+  //           uint i = dof->qIndex + k;
+  //           double tau_i = F.last()->C.qdot(i);
+  //           y.elem(m) = lo - tau_i;
+  //           if (!!J) J.elem(m, i) -= 1.0;
+  //           m++;
+  //           y.elem(m) = tau_i - up;
+  //           if (!!J) J.elem(m, i) += 1.0;
+  //           m++;
+  //         } else {
+  //           m += 2;
+  //         }
+  //       }
+  //     }
+  //   }
+  //   CHECK_EQ(m, M, "");
+  // }
+
+  // uint dim_phi2(const FrameL& F) {
+  //   uint m = 0;
+  //   DofL dofs = getDofs(F);
+  //   for (rai::Dof* dof : dofs) {
+  //     if (dof->torqueLimits.N) m += 2 * dof->dim;
+  //   }
+  //   return m;
+  // }
+
+
+
+//===========================================================================
+
 void F_qQuaternionNorms::phi2(arr& y, arr& J, const FrameL& F) {
   uint n=dim_phi2(F);
   if(!n){ y.clear(); J.clear(); return; }

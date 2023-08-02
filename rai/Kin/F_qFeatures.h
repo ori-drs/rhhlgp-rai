@@ -52,6 +52,13 @@ struct F_qLimits : Feature {
 
 //===========================================================================
 
+struct F_torqueLimits {
+  void phi2(arr& y, arr& J, const FrameL& F);
+  uint dim_phi2(const FrameL& F);
+};
+
+//===========================================================================
+
 struct F_qQuaternionNorms : Feature {
   virtual void phi2(arr& y, arr& J, const FrameL& F);
   virtual uint dim_phi2(const FrameL& F);

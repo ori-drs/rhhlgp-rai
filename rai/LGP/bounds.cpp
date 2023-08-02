@@ -155,7 +155,7 @@ SeqBound::SeqBound(ptr<KOMO>& komo,
   komo->clearObjectives();
 
   komo->setModel(startKinematics, collisions);
-  komo->setTiming(maxPhase+1., 1, 5., 1);
+  komo->setTiming(maxPhase+0.5, 1, 5., 1);
 //  komo->solver=rai::KS_sparse; //sparseOptimization = true;
   komo->animateOptimization = 0;
 
@@ -191,7 +191,7 @@ PathBound::PathBound(ptr<KOMO>& komo,
   komo->setModel(startKinematics, collisions);
   uint stepsPerPhase = rai::getParameter<uint>("LGP/stepsPerPhase", 10);
   uint pathOrder = rai::getParameter<uint>("LGP/pathOrder", 2);
-  komo->setTiming(maxPhase+1.0, stepsPerPhase, 10., pathOrder);
+  komo->setTiming(maxPhase+0.5, stepsPerPhase, 10., pathOrder);
   komo->animateOptimization = 0;
 
   komo->addSquaredQuaternionNorms();
@@ -227,7 +227,7 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   komo->setModel(startKinematics, collisions);
   uint stepsPerPhase = rai::getParameter<uint>("LGP/stepsPerPhase", 10);
   uint pathOrder = rai::getParameter<uint>("LGP/pathOrder", 2);
-  komo->setTiming(maxPhase+1.0, stepsPerPhase, 10., pathOrder);
+  komo->setTiming(maxPhase+0.5, stepsPerPhase, 10., pathOrder);
   komo->animateOptimization = 0;
 
   komo->addSquaredQuaternionNorms();
@@ -295,7 +295,6 @@ SeqVelPathBound::SeqVelPathBound(ptr<KOMO>& komo,
 //      komo->objectives.resizeCopy(O);
 
   if(collisions) komo->add_collision(true, 0, 1e1);
-
   komo->run_prepare(.01);
   komo->initWithWaypoints(waypoints, false);
   //      cout <<komo->getPath_times() <<endl;
