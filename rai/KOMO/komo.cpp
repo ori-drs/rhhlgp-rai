@@ -673,7 +673,6 @@ void KOMO::setSkeleton(const Skeleton &S)
       addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(0)}, OT_eq, {1e2}, {0., 0., -1.});
       addObjective({s.phase0, s.phase1}, FS_qItself, {"z_joint_7"}, OT_sos, {1e2}, {1.57});
       addObjective({s.phase0, s.phase1}, FS_qItself, {"jointBase_pitch"}, OT_sos, {1e2}, {.0});
-      std::cout << "grasp top " << "\n";
       break;
     }
     case SY_moveGripper:{
@@ -685,8 +684,6 @@ void KOMO::setSkeleton(const Skeleton &S)
       addObjective({s.phase0, s.phase1}, FS_qItself, {"jointBase_pitch"}, OT_sos, {1e2}, {.0});
       addObjective({s.phase0, s.phase1}, FS_positionDiff, {s.frames(0), s.frames(1)}, OT_eq, {1e2}, {0., 0., 0.5*objSize+0.3});
       
-      std::cout << "move gripper " << "\n";
-
       break;
     }
     case SY_locomote:
@@ -708,18 +705,14 @@ void KOMO::setSkeleton(const Skeleton &S)
     addObjective({s.phase0, s.phase1}, make_shared<F_qZeroVel>(), {"z_joint_7"}, OT_eq, {1e2}, {0.}, 1, +1, -1);
     addObjective({s.phase0, s.phase1}, FS_qItself, {"jointBase_pitch"}, OT_sos, {1e2}, {0.});
 
-    std::cout << "locomote " << "\n";
-
     break;
     }
     case SY_lift:
     {
-      std::cout << "calling lift "
-                << "\n";
       rai::Frame *objFrame = world.getFrame(s.frames(1));
       arr posObjFrame = objFrame->getPosition();
       double objSize = shapeSize(world, s.frames(1), 2);
-      addObjective({s.phase0, s.phase1}, FS_position, {s.frames(0)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0), objFrame->getPosition().elem(1), objFrame->getPosition().elem(2) + 0.5});
+      addObjective({s.phase0, s.phase1}, FS_position, {s.frames(0)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0), objFrame->getPosition().elem(1), objFrame->getPosition().elem(2) + 0.2});
       addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(0)}, OT_eq, {1e2}, {0., 0., -1.});
       addObjective({s.phase0, s.phase1}, FS_qItself, {"jointBase_pitch"}, OT_sos, {1e2}, {.0});
       addObjective({s.phase0, s.phase1}, FS_qItself, {"z_joint_7"}, OT_sos, {1e2}, {1.57});
