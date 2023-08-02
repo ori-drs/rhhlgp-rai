@@ -746,7 +746,14 @@ rai::String LGP_Tree::report_csv() {
   }  
   else cout << "No best node" << endl;
 
-  out << "TIME " << "TREE " << "POSE " << "SEQ " << "EXPANDED " << "BASE_PATH_LENGTH " << "WTR_PATH_LENGTH " << "\n";//<< "PATH " << "bestPose " << "bestSeq "<< "bestPath " << "#solutions " << "\n";
+  //get costs and constraints of the final path
+  Graph result = bpath->komoProblem(BD_seqPath)->getReport();
+  double cost_here = result.get<double>("sos");
+  double constraints_here = result.get<double>("eq");
+  constraints_here += result.get<double>("ineq");
+
+
+  // out << "TIME " << "TREE " << "POSE " << "SEQ " << "EXPANDED " << "BASE_PATH_LENGTH " << "WTR_PATH_LENGTH " << "COSTS " << "CONSTRAINTS" << "\n";//<< "PATH " << "bestPose " << "bestSeq "<< "bestPath " << "#solutions " << "\n";
   csv_file << out;
   out.clear();
   out <<" \n" <<rai::cpuTime() 
@@ -755,7 +762,9 @@ rai::String LGP_Tree::report_csv() {
       <<" " <<COUNT_opt(BD_seq)
       <<" " <<numSteps - 1
       <<" " <<base_footrpint_path_length
-      <<" " <<wtr_path_length;
+      <<" " <<wtr_path_length
+      <<" " <<cost_here
+      <<" " <<constraints_here;
       // <<" " <<COUNT_opt(BD_path)+COUNT_opt(BD_seqPath)
       // <<" " <<(bpose?bpose->cost(1):100.)
       // <<" " <<(bseq ?bseq ->cost(2):100.)
@@ -775,7 +784,7 @@ void LGP_Tree::run(uint steps) {
 
   for(uint k=0; k<steps; k++) {
     step();
-
+    displayTreeUsingDot();
     if(fringe_solved.N>=stopSol) break;
     if(COUNT_time>stopTime) break;
   }
