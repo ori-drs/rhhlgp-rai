@@ -463,9 +463,14 @@ bool LGP_Tree::execChoice(rai::String cmd) {
 LGP_Node* LGP_Tree::getBest(LGP_NodeL& fringe, int level) {
   if(!fringe.N) return nullptr;
   LGP_Node* best=nullptr;
-  for(LGP_Node* n:fringe) {
+  for(LGP_Node* n:fringe) { 
+    // cout << "getBest: inspecting node with sequence: "<<n ->getTreePathString()<<endl;
     if(n->isInfeasible || !n->count(level)) continue;
-    if(!best || (n->feasible(level) && n->cost(level)<best->cost(level))) best=n;
+    if(!best || (n->feasible(level) && n->cost(level)<best->cost(level))) {
+      best=n;
+      // cout << "new best added with cost = "<<best->cost(level)<< ", sequence = " << best->getTreePathString()<<endl;
+    }
+     
   }
   return best;
 }
@@ -480,6 +485,10 @@ LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
 
 LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //expand
   if(!fringe_expand.N) HALT("the tree is dead!");
+  // for (LGP_Node *n : fringe_expand)
+  //   {
+  //     cout << "fringe expand sequence!!!" << *n << "\n";
+  //   }
   LGP_Node* n = heuristicCosts ? popBest(fringe_expand, BD_symbolic) : fringe_expand.popFirst();	// either use popFirst or the node with best heuristic if there is one
   CHECK(n, "");
 	if (n->children.N) return nullptr; 				// if we already saw this node then dont expand it again
@@ -487,7 +496,9 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
   n->expand();
   for(LGP_Node* ch:n->children) {
   	if (heuristicCosts) heuristicCosts(ch); // here we compute the heuristic costs and write them into ch->costs(BD_sym)
+    // cout << "Logging during expandNext: sequence: "<<ch -> getTreePathString() <<endl;
 		if(ch->isTerminal) {
+      // cout << "this node is terminal//////"<<endl;
       terminals.append(ch);
       LGP_NodeL path = ch->getTreePath();
 			// NEW: skip pose bound and add to fringe seq directly, was fringe_poseToGoal
@@ -502,13 +513,21 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
 }
 
 void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawFrom, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren) { //optimize a seq
-  if(!drawFringe.N) return;
+
+  if(!drawFringe.N){ 
+    // cout<<"Level "<< drawFrom<<" failed to find solution!"<<endl;
+    return;}
+  // for(LGP_Node* n_:drawFringe) {
+  // cout << "drawFringe" << n_->getTreePathString()<<endl;}
   LGP_Node* n = popBest(drawFringe, drawFrom);
+  cout <<"POP BEST" <<*n <<endl;
   if(n && !n->count(bound)) {
+    if (bound == BD_seqPath) cout << "Finish popBest: node returned:"<< n->getTreePathString()<<endl;
     try {
       bool extend_waypoints = true;
+      // cout <<"//////////////// rgraph_heuristic"<< rgraph_heuristic<<endl;
       if (!rgraph_heuristic) extend_waypoints = false;
-    	// optBound is the classic and unchanged implementation
+      // optBound is the classic and unchanged implementation
       n->optBound(bound, collisions, verbose-2, extend_waypoints);
     } catch(const char* err) {
       LOG(-1) <<"opt(level=" <<bound <<") has failed for the following node:";
@@ -518,33 +537,35 @@ void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType 
 
     if(n->feasible(bound)) {
       if(addIfTerminal && n->isTerminal) addIfTerminal->append(n);
+      else cout<<"Level "<< bound <<" is feasible but not terminal! "<<endl;
       if(addChildren) for(LGP_Node* c:n->children) addChildren->append(c);
     }
     // NEW: use path bound if seq path does not work
     else if(bound == BD_seqPath && !n->feasible(bound)) {
-    	Graph result = n->komoProblem(BD_seqPath)->getReport((n->komoProblem(BD_seqPath)->verbose>0 && bound>=2));
-    	double constraints_here = result.get<double>("eq");
-    	constraints_here += result.get<double>("ineq");
-    	cout << "FEASIBLE SEQ PATH= " << constraints_here << endl;
-			RAI_MSG("TRYING PATH BOUND");
-			try {
-				n->optBound(BD_path, collisions, verbose-2);
-			} catch(const char* err) {
-				LOG(-1) <<"opt(level=" <<BD_path <<") has failed for the following node:";
-				n->write(cout, false, true);
-				LOG(-3) <<"node optimization failed";
-			}
-			result = n->komoProblem(BD_path)->getReport((n->komoProblem(BD_seqPath)->verbose>0 && bound>=2));
-			constraints_here = result.get<double>("eq");
-			constraints_here += result.get<double>("ineq");
-			cout << "FEASIBLE PATH= " << constraints_here << endl;
-			if(n->feasible(BD_path)) {
-				if(addIfTerminal && n->isTerminal) addIfTerminal->append(n);
-				if(addChildren) for(LGP_Node* c:n->children) addChildren->append(c);
-			}
+      Graph result = n->komoProblem(BD_seqPath)->getReport((n->komoProblem(BD_seqPath)->verbose>0 && bound>=2));
+      double constraints_here = result.get<double>("eq");
+      constraints_here += result.get<double>("ineq");
+      cout << "FEASIBLE SEQ PATH= " << constraints_here << endl;
+      RAI_MSG("TRYING PATH BOUND");
+      try {
+        n->optBound(BD_path, collisions, verbose-2);
+      } catch(const char* err) {
+        LOG(-1) <<"opt(level=" <<BD_path <<") has failed for the following node:";
+        n->write(cout, false, true);
+        LOG(-3) <<"node optimization failed";
+      }
+      result = n->komoProblem(BD_path)->getReport((n->komoProblem(BD_seqPath)->verbose>0 && bound>=2));
+      constraints_here = result.get<double>("eq");
+      constraints_here += result.get<double>("ineq");
+      cout << "FEASIBLE PATH= " << constraints_here << endl;
+      if(n->feasible(BD_path)) {
+        if(addIfTerminal && n->isTerminal) addIfTerminal->append(n);
+        if(addChildren) for(LGP_Node* c:n->children) addChildren->append(c);
+      }
     }
     focusNode = n;
   }
+  else cout << "Escaping optbestonlevel"<<endl;
 }
 
 void LGP_Tree::optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* addIfTerminal) {
@@ -568,9 +589,12 @@ void LGP_Tree::optFirstOnLevel(BoundType bound, LGP_NodeL& fringe, LGP_NodeL* ad
 }
 
 void LGP_Tree::clearFromInfeasibles(LGP_NodeL& fringe) {
-  for(uint i=fringe.N; i--;)
-    if(fringe.elem(i)->isInfeasible) fringe.remove(i);
-}
+  for(uint i=fringe.N; i--;){
+    if(fringe.elem(i)->isInfeasible){ fringe.remove(i);
+    // LGP_Node *n = fringe.elem(i);
+    // cout << "infeasible node:"<<*n<<endl;
+    }
+  }}
 
 uint LGP_Tree::numFoundSolutions() {
   return fringe_solved.N;
@@ -608,13 +632,18 @@ void LGP_Tree::reportEffectiveJoints() {
   NIY//focusNode->komoProblem.last()->reportEffectiveJoints();
 }
 
-void LGP_Tree::step() {
-  if(fringe_expand.N) expandNext();
-  uint numSol = fringe_solved.N;
 
-  // optBest with our bounds
+
+void LGP_Tree::step() {
+  cout << "-------------------------------" <<endl;
+  if(fringe_expand.N) expandNext();
+  if (fringe_seq.N) cout <<"Level 0 found " <<fringe_seq.last()->getTreePathString() <<endl;
+  uint numSol = fringe_solved.N;
+  
+  cout << "================== Optimizing level 2 ==================" <<endl;
 	optBestOnLevel(BD_seq, fringe_seq, BD_symbolic, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
+  cout << "================== Optimizing level 4 ==================" <<endl;
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
   if(fringe_solved.N>numSol) {
@@ -627,14 +656,15 @@ void LGP_Tree::step() {
 			else if(focusNode->komoProblem(BD_path)) bound = BD_path;
 			else HALT("NO KOMO FOUND");
       if(write_csv){
-        csv_file.open("data.csv");
         // Save final result to csv file
         cout<< "Saving result to csv file.."<<endl;
         csv_file.open("data.csv", std::ios::out | std::ios::app);
         report_csv();
         csv_file.close();
       }
-			focusNode->komoProblem(bound)->view(true, "optimized motion");
+			focusNode->komoProblem(bound)->view(false, "optimized motion");
+      cout<<"final result shown"<<endl;
+      // exit(0);
 			focusNode->komoProblem(bound)->view_play(true); 				//< press q to continue after video was displayed
     }
   }
@@ -648,6 +678,7 @@ void LGP_Tree::step() {
   clearFromInfeasibles(terminals);
 
   if(verbose>0) {
+    // cout << "-------------REPORT------------------" <<endl;
     rai::String out=report();
     fil <<out <<endl;
     cout <<out <<endl;
@@ -790,7 +821,7 @@ void LGP_Tree::run(uint steps) {
   }
 
   
-  if(verbose>0) report(true);
+  // if(verbose>0) report(true);
 
   //basic output
   ofstream output(dataPath+"lgpopt");
