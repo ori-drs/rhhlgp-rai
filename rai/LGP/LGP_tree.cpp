@@ -373,18 +373,31 @@ LGP_Node* LGP_Tree::walkToNode(const rai::String& seq) {
 
   //first walk to the node that corresponds to seq
   LGP_Node* node = root;
+    cout <<"node " <<endl;
+
   for(Node* actionLiteral:tmp) {
 //    if(specificBound==BD_all || specificBound==BD_pose) node->optBound(BD_pose, collisions); //optimize poses along the path
+      cout <<"looping over action literal " <<endl;
+
     if(!node->isExpanded) {
 //      node->expand();
+      cout <<"exspansing single child " <<endl;
+
       node->expandSingleChild(actionLiteral);
+      cout <<"exspansing single child  after" <<endl;
+
     }
+          cout <<"before get child by action " <<endl;
+
     LGP_Node* next = node->getChildByAction(actionLiteral);
+              cout <<"after child by action " <<endl;
+
     if(!next) LOG(-2) <<"action '" <<*actionLiteral <<"' is not a child of '" <<*node <<"'";
     node = next;
   }
 
   focusNode = node;
+  std::cout << "walk to node ended" << "\n";
   return node;
 }
 
@@ -469,6 +482,9 @@ LGP_Node* LGP_Tree::getBest(LGP_NodeL& fringe, int level) {
 }
 
 LGP_Node* LGP_Tree::popBest(LGP_NodeL& fringe, uint level) {
+    // for(LGP_Node* fr:fringe) {
+    // std::cout << "node fringe " << *fr << "\n";
+    // }
   if(!fringe.N) return nullptr;
   LGP_Node* best=getBest(fringe, level);
   if(!best) return nullptr;
@@ -502,9 +518,13 @@ LGP_Node* LGP_Tree::expandNext(int stopOnDepth, LGP_NodeL* addIfTerminal) { //ex
 void LGP_Tree::optBestOnLevel(BoundType bound, LGP_NodeL& drawFringe, BoundType drawFrom, LGP_NodeL* addIfTerminal, LGP_NodeL* addChildren) { //optimize a seq
   if(!drawFringe.N) return;
   LGP_Node* n = popBest(drawFringe, drawFrom);
+  std::cout << "NODE BEST " << *n << "\n";
   if(n && !n->count(bound)) {
+      std::cout << "after if " << *n << "\n";
+
     try {
     	// optBound is the classic and unchanged implementation
+      std::cout << "before opt bound " << *n << "\n";
       n->optBound(bound, collisions, verbose-2);
     } catch(const char* err) {
       LOG(-1) <<"opt(level=" <<bound <<") has failed for the following node:";
@@ -606,13 +626,15 @@ void LGP_Tree::reportEffectiveJoints() {
 
 void LGP_Tree::step() {
   std::cout << "step " << "\n";
-  expandNext();
+  if(fringe_expand.N) expandNext();
 
   uint numSol = fringe_solved.N;
 
   // optBest with our bounds
+  std::cout << "********OPTIMIZING 2nd LEVEL ******" << "\n";
 	optBestOnLevel(BD_seq, fringe_seq, BD_symbolic, &fringe_path, nullptr);
   if(verbose>0 && fringe_path.N) cout <<"EVALUATING PATH " <<fringe_path.last()->getTreePathString() <<endl;
+  std::cout << "********OPTIMIZING 3nd LEVEL ******" << "\n";
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
   if(fringe_solved.N>numSol) {

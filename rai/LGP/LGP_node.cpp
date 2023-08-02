@@ -113,8 +113,10 @@ void LGP_Node::expandSingleChild(Node *actionLiteral, int verbose) {
   NodeL symbols = actionLiteral->parents;
   FOL_World::Handle action = FOL_World::Handle(new FOL_World::Decision(false, symbols.first(), symbols({1,-1}), -1));
   fol.verbose=tmp;
-
+  std::cout << "passing this point here " << "\n";
+  std::cout << "action " << action << "\n";
   new LGP_Node(this, action);
+  std::cout << "didn't pass thi spoint here" << "\n";
 }
 
 void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
@@ -124,9 +126,9 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
 
   komo->verbose = rai::MAX(verbose, 0);
 
-  if(komo->verbose>0) {
+  // if(komo->verbose>0) {
     cout <<"########## OPTIM lev " <<bound <<endl;
-  }
+  // }
 
   komo->logFile = new ofstream(OptLGPDataPath + STRING("komo-" <<id <<'-' <<step <<'-' <<bound));
 
