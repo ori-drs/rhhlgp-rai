@@ -656,6 +656,33 @@ void LGP_Tree::step() {
 			else if(focusNode->komoProblem(BD_path)) bound = BD_path;
 			else HALT("NO KOMO FOUND");
       if(write_csv){
+      //   arr Time = focusNode->komoProblem(BD_seqPath)->getPath_times();
+      //   uint totalSteps = Time.N;
+      //   uint stepsPerEachPhase = focusNode->komoProblem(BD_seqPath)->stepsPerPhase;
+      //   Skeleton S = focusNode->getSkeleton();
+      //   getSwitchesFromSkeleton(S, kin);
+      //   uint komo_order = 0;
+      //   std::vector<int>  touchVector;
+      //   touchVector.resize(static_cast<int>(totalSteps + komo_order), 0); // initialize with 0s
+      //   for (const SkeletonEntry &entry : S)
+      //     {
+      //       if (entry.symbol.contains("stable"))
+      //       {
+      //         double startIndex = entry.phase0 * stepsPerEachPhase;
+      //         double endIndex = (entry.phase1 < 0) ? totalSteps : (entry.phase1 * stepsPerEachPhase); // negative phase1 means until the end
+      //         for (int i = static_cast<int>(startIndex + komo_order); i < static_cast<int>(endIndex + komo_order); i++)
+      //         {
+      //           touchVector[i] = 1;
+      //         }
+      //       }
+      //     }
+        
+      //   cout << "========================================touchVector: " <<endl;
+      //   // Print the values to the terminal
+      //   for (int i : touchVector) {
+      //     cout << i << ", ";
+      //   }
+      //   cout <<"Control command: " << focusNode ->komoProblem(BD_seqPath)->getPath_qAll() <<endl;
         // Save final result to csv file
         cout<< "Saving result to csv file.."<<endl;
         csv_file.open("data.csv", std::ios::out | std::ios::app);
