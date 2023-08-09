@@ -201,7 +201,6 @@ PathBound::PathBound(ptr<KOMO>& komo,
 #endif
 
   komo->setSkeleton(S);
-
   if(collisions) komo->add_collision(true, 0., 1e1);
 
   komo->run_prepare(.01);
@@ -250,7 +249,7 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   //      komo->objectives.resizeCopy(O);
 
   if(collisions) komo->add_collision(true, 0., 1e1);
-
+ 
   komo->run_prepare(.01);
   komo->initWithWaypoints(maxPhase, waypoints, waypointsStepsForPhases);
   //      cout <<komo->getPath_times() <<endl;

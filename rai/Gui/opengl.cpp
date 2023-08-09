@@ -1987,6 +1987,7 @@ int OpenGL::watch(const char* txt) {
 /// update the view (in Qt: also starts displaying the window)
 int OpenGL::update(const char* txt, bool nonThreaded) {
   if(rai::getDisableGui()) return 27; //ESC key
+  cout<<"I'm in OpenGL::update()"<<endl;
   openWindow();
   if(txt) text.clear() <<txt;
 #ifdef RAI_GL
@@ -2007,6 +2008,7 @@ int OpenGL::update(const char* txt, bool nonThreaded) {
 #endif
   int key=pressedkey;
   pressedkey=0;
+  cout<< "key: " <<key <<endl;
 //  if(key) LOG(0) <<"KEY! " <<key;
   return key;
 }

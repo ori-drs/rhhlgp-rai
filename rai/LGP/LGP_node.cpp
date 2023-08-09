@@ -70,7 +70,9 @@ LGP_Node::LGP_Node(LGP_Node* parent, MCTS_Environment::Handle& a)
   ret = fol.transition(a);
   time = parent->time + ret.duration;
   isTerminal = fol.successEnd;
-  if(fol.deadEnd) isInfeasible=true;
+  
+  if(fol.deadEnd){ isInfeasible=true;cout<<"isInfeasible==================================="<<endl;
+  }
   folState = fol.createStateCopy();
   folDecision = folState->getNode("decision");
   decision = a;
@@ -126,7 +128,8 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
 
   komo->verbose = rai::MAX(verbose, 0);
 
-  if(komo->verbose>0) {
+  // if(komo->verbose>0) {
+  if(true) {
     cout <<"########## OPTIM lev " <<bound <<endl;
   }
 
@@ -140,7 +143,12 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
   if(bound==BD_seqPath || bound==BD_seqVelPath) {
     CHECK(komoProblem(BD_seq), "BD_seq needs to be computed before");
     waypoints = komoProblem(BD_seq)->getPath_qAll();
-    rai::String ee_name = "hsrG";
+    cout <<"ORIGINAL WAYPOINTS: " <<waypoints <<endl;
+    for (int i=0; i<waypoints.N; i++) {
+      cout <<"step "<<i <<"'s length : "<<waypoints(i).N <<endl;
+    }
+    // rai::String ee_name = "hsrG";
+    rai::String ee_name = "pr2R";
     arrA cart_waypoints = (komoProblem(BD_seq)->getPath_X_pos(ee_name));
     cout <<"get path x: " << (komoProblem(BD_seq)->getPath_X_pos(ee_name))<<endl;
     LGP_NodeL path = getTreePath();
@@ -149,7 +157,9 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
       arrA extended_waypoints;
       uintA extended_steps;
       uint i=0;
-      for(LGP_Node* b : path) {      
+      uint tmp_count_steps;
+      for(LGP_Node* b : path) {
+        tmp_count_steps = extended_waypoints.N;      
         extended_waypoints.setAppend(waypoints(i));
         arrA rg_waypoints = rg_service.query_rgraph_path(cart_waypoints(i),cart_waypoints(i+1));
         cout << "rg_waypoints: " << rg_waypoints << endl;
@@ -158,27 +168,32 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
             rai::Configuration C_ = startKinematics;
             rai::Frame *f = C_.addFrame("waypoint");
             f->setPosition({rg_waypoints(j)});         
-            
             KOMO ik_komo;
             ik_komo.verbose = 0;
             ik_komo.setModel(C_);
             ik_komo.setIKOpt();
             ik_komo.add_collision(true, 0, 1e2);
-            ik_komo.addObjective({}, FS_positionDiff, {"worldTranslationRotation", "waypoint"}, OT_eq, {1e3});
+            // ik_komo.addObjective({}, FS_positionDiff, {"worldTranslationRotation", "waypoint"}, OT_eq, {1e3});
+            ik_komo.addObjective({}, FS_positionDiff, {ee_name, "waypoint"}, OT_eq, {1e3});
             ik_komo.optimize();
-
             cout << "IK: "<<ik_komo.x << endl;
-            arr tmp_pose = {0, 0, 0, 0, 0,  rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2)};  
+
+            arr tmp_pose;
+            if (ee_name = "pr2R") 
+              // tmp_pose =  {rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2),0, 0, 0, 0, 0, 0, 0};
+              tmp_pose =  ik_komo.x;
+            else if (ee_name == "hsrG") tmp_pose = {0, 0, 0, 0, 0,  rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2)};  
             // add obj joints so that the graph's waypoints have the same dofs with the switch waypoints
             for(uint k=tmp_pose.N; k<(waypoints(i).N); k++) {
               tmp_pose.setAppend(waypoints(i)(k));
             }       
-            cout <<tmp_pose << endl;
+            // cout <<"tmp_pose at "<<j<<" : " <<tmp_pose << endl;
             extended_waypoints.setAppend(tmp_pose);
           }
         }
 
-        extended_steps.append(rg_waypoints.N);
+        // extended_steps.append(rg_waypoints.N-1);
+        extended_steps.append(extended_waypoints.N - tmp_count_steps);
         i+=1;
         if (i == waypoints.N-1) break;
       }
@@ -186,7 +201,11 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
       waypoints = extended_waypoints;
       steps_per_phase = extended_steps;
 
-      cout <<"Full waypoints' length: "<< waypoints.N<<endl;      
+      cout <<"Full waypoints' length: "<< waypoints.N<<endl;
+      for (int i=0; i<waypoints.N; i++) {
+        cout <<"step "<<i <<"'s length : "<<waypoints(i).N <<endl;
+      }
+      cout << "Extended steps: " << steps_per_phase << endl;    
     }
   }
 
@@ -204,7 +223,6 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
   }
 
   computes.append(comp);
-
   for(ptr<Objective>& o:tree->finalGeometryObjectives.objectives) {
     cout <<"FINAL objective: " <<*o <<endl;
     ptr<Objective> co = komo->addObjective({(double)(komo->T-1), (double)(komo->T-1)}, o->feat, {}, o->type);
@@ -257,10 +275,13 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
     cost_here = komo->sos;
     constraints_here = komo->ineq + komo->eq;
   }
+  bool feas = (constraints_here<100);
+  if (bound==BD_seqPath){
+   feas = (constraints_here<500);
+  }
 
-  bool feas = (constraints_here<2.5);
-
-  if(komo->verbose>0) {
+  // if(komo->verbose>0) {
+  if(true) {
     cout <<"  RESULTS: cost: " <<cost_here <<" constraints: " <<constraints_here <<" feasible: " <<feas <<endl;
   }
 
@@ -275,6 +296,7 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
   //-- read out and update bound
   //update the bound
   if(feas) {
+
     if(count(bound)==1/*&& count({2,-1})==0 (also no higher levels)*/ || cost_here<highestBound) highestBound=cost_here;
   }
 
@@ -297,6 +319,7 @@ void LGP_Node::setInfeasible() {
 }
 
 void LGP_Node::labelInfeasible() {
+  cout << "found infeasible nodes~!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
   setInfeasible();
 
   //-- remove children
@@ -469,7 +492,9 @@ bool LGP_Node::recomputeAllFolStates() {
     if(fol.is_feasible_action(decision)) {
       ret = fol.transition(decision);
       time = parent->time + ret.duration;
+      cout << "LGP_node 434 "<<isTerminal <<endl;
       isTerminal = fol.successEnd;
+      cout << "LGP_node 436 "<<isTerminal <<endl;
       if(fol.deadEnd) {
         if(!feasible(BD_seq) && !feasible(BD_path)) //seq or path have already proven it feasible! Despite the logic...
           isInfeasible=true;

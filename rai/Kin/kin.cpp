@@ -517,6 +517,7 @@ arr Configuration::getFrameState(const FrameL& F) const {
   arr X(F.N, 7);
   for(uint i=0; i<X.d0; i++) {
     X[i] = F.elem(i)->ensure_X().getArr7d();
+    rai::String name_ = F.elem(i)->name;
   }
   return X;
 }
@@ -563,8 +564,11 @@ void Configuration::setJointState(const arr& _q, const FrameL& F) {
   setJointStateCount++; //global counter
   ensure_q();
 
+  // cout << "Received q length = " << _q.N <<endl;
   uint nd=0;
   for(Frame* f:F) {
+  // cout <<"SetJointState .."<<endl;
+
     Joint* j = f->joint;
     if(!j && !f->forces.N) HALT("frame '" <<f->name <<"' is not a joint and has no forces!");
     if(!j->mimic) CHECK_LE(nd+j->dim,_q.N, "given q-vector too small");
@@ -574,12 +578,14 @@ void Configuration::setJointState(const arr& _q, const FrameL& F) {
         for(uint ii=0; ii<j->dim; ii++) q.elem(j->qIndex+ii) = _q(nd+ii);
       }
       j->setDofs(q, j->qIndex);
+      // cout << "active joint:"<<j->dim<<endl;
     }else{
 //      if(activesOnly) HALT("frame '" <<f->name <<"' is a joint, but INACTIVE!");
       if(!j->mimic){
         for(uint ii=0; ii<j->dim; ii++) qInactive.elem(j->qIndex+ii) = _q(nd+ii);
       }
       j->setDofs(qInactive, j->qIndex);
+      // cout << "inactive joint:"<<j->dixm<<endl;
     }
     if(!j->mimic) nd += j->dim;
   }
@@ -591,6 +597,7 @@ void Configuration::setJointState(const arr& _q, const FrameL& F) {
   }
   CHECK_EQ(_q.N, nd, "given q-vector has wrong size");
 
+  // cout << nd <<"/////////////////////////////////////////"<<endl;
   proxies.clear();
 
   _state_q_isGood=true;
@@ -1864,6 +1871,7 @@ bool Configuration::hasView(){
 
 int Configuration::watch(bool pause, const char* txt) {
 //  gl()->resetPressedKey();
+  cout<<"I'm here 1874"<<endl;
   int key = gl()->setConfiguration(*this, txt, pause);
 //  if(pause) {
 //    if(!txt) txt="Config::watch";
@@ -1871,6 +1879,7 @@ int Configuration::watch(bool pause, const char* txt) {
 //  } else {
 //    key = watch(false, txt, true);
 //  }
+  cout << "key returned "<<key <<endl;
   return key;
 }
 
@@ -1944,6 +1953,7 @@ void Configuration::addProxies(const uintA& collisionPairs) {
       p.posA = frames.elem(collisionPairs(i, 0))->getPosition();
       p.posB = frames.elem(collisionPairs(i, 1))->getPosition();
       j++;
+      // cout<< frames.elem(collisionPairs(i, 0))->name <<" vs "<<frames.elem(collisionPairs(i, 1))->name <<endl;
     }
   }
 }

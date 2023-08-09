@@ -523,6 +523,9 @@ void KOMO::setSkeleton(const Skeleton& S) {
   for(uint i=0; i<switches.d0; i++) {
     int j = switches(i, 0);
     int k = switches(i, 1);
+    // cout <<"adding switch for "<<S(k).frames<<" from "<<S(k).phase0<< " to "<<S(k).phase1<<" symbol: "<<S(k).symbol<<endl;
+
+
     addModeSwitch({S(k).phase0, S(k).phase1}, S(k).symbol, S(k).frames, j<0);
   }
   //-- add objectives for rest
@@ -695,7 +698,7 @@ void KOMO::setSkeleton(const Skeleton& S, rai::ArgWord sequenceOrPath){
 void KOMO::add_collision(bool hardConstraint, double margin, double prec) {
   if(hardConstraint) { //interpreted as hard constraint (default)
     addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"ALL"}, OT_eq, {prec}, NoArr);
-    addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"obj0", "obj1", "obj2"}, OT_eq, {prec}, NoArr);
+    // addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"obj0", "obj1","obj2"}, OT_eq, {prec}, NoArr);
   } else { //cost term
     addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"ALL"}, OT_sos, {prec}, NoArr);
   }
@@ -835,42 +838,62 @@ void KOMO::initWithConstant(const arr& q) {
 void KOMO::initWithWaypoints(const uint number_of_phases, const arrA& waypoints, uintA waypointStepsPerPhase, bool sineProfile) {
   //compute in which steps (configuration time slices) the waypoints are imposed
 
-  uintA steps(number_of_phases + 1);
+  uintA steps(number_of_phases);
   for(uint i=0; i<steps.N; i++) {
     steps(i) = conv_time2step(conv_step2time(i, 1), stepsPerPhase);
   }
 
 	//view(true, STRING("before"));
+// *************this is for reachability graph *************
+// #ifndef KOMO_MIMIC_STABLE //depends on sw->isStable -> mimic !!
+//   uint waypoint_ind = 0;
+//   double incremental_step;
+//   uint override_ind = 0;
+//   for(uint i=0; i<steps.N; i++) {
+//     cout <<"at step " << i << " of " << steps.N << endl;
+//     uint Tstart = steps(i);
+//     // distribute waypoints over stepPerPhases
+//     if (i!=steps.N-1)
+//       incremental_step = stepsPerPhase/(double)(waypointStepsPerPhase(i));
+//     else incremental_step = 1;
+//     uint Tstop=T;
+//     cout <<"T="<< T<< endl;
+//     if (i+1<steps.N && steps(i+1)<T) Tstop=steps(i+1);
+//     cout<< Tstart << " " << Tstop << endl;
+//     cout<< incremental_step  << " " << override_ind << " " << waypointStepsPerPhase(i) << endl;
 
+//     for(uint t=steps(i); t<Tstop; t++) {
+      
+//       waypoint_ind = override_ind + round((1.0/incremental_step)*(t-steps(i)));
+//       if (incremental_step == stepsPerPhase) waypoint_ind  = override_ind;
+//       if ((waypoint_ind == override_ind + waypointStepsPerPhase(i))){
+//         waypoint_ind -= 1;
+//       }
+//       if (waypoint_ind >= waypoints.N) waypoint_ind = waypoints.N-1;
+//       cout << "setting configuration constraint at timestep " << t << " to waypoint " << waypoint_ind << " length = " << waypoints(waypoint_ind).N << endl;
+//       setConfiguration_qAll(t, waypoints(waypoint_ind));
+//     }
+//     if (i<waypointStepsPerPhase.N) override_ind += waypointStepsPerPhase(i); // dispose remaining waypoints if not evenly spaced and skip to the next switch's waypoint
+//     waypoint_ind = override_ind;
+//   }
+// #endif
+// **************original code**************
 #ifndef KOMO_MIMIC_STABLE //depends on sw->isStable -> mimic !!
-  uint waypoint_ind = 0;
-  double incremental_step;
-  uint override_ind = 0;
   for(uint i=0; i<steps.N; i++) {
-  
-    uint Tstart = steps(i);
-    // distribute waypoints over stepPerPhases
-    if (i!=steps.N-1)
-      incremental_step = stepsPerPhase/(double)(waypointStepsPerPhase(i)+1);
-    else incremental_step = 1;
     uint Tstop=T;
     if(i+1<steps.N && steps(i+1)<T) Tstop=steps(i+1);
     for(uint t=steps(i); t<Tstop; t++) {
-      waypoint_ind = override_ind + round((1.0/incremental_step)*(t-steps(i)));
-      if (incremental_step == stepsPerPhase) waypoint_ind  = override_ind;
-      if (waypoint_ind == override_ind + waypointStepsPerPhase(i) + 1){
-        waypoint_ind -= 1;
-      }
-      setConfiguration_qAll(t, waypoints(waypoint_ind));
+      setConfiguration_qAll(t, waypoints(i));
     }
-    if (i<waypointStepsPerPhase.N) override_ind += waypointStepsPerPhase(i)+1; // dispose remaining waypoints if not evenly spaced and skip to the next switch's waypoint
-    waypoint_ind = override_ind;
   }
 #else
   for(uint i=0; i<steps.N; i++) {
     if(steps(i)<T) setConfiguration_qAll(steps(i), waypoints(i));
   }
 #endif
+
+
+
 
 //  view(true, STRING("after"));
 
@@ -1349,7 +1372,10 @@ void KOMO::setupPathConfig() {
     fcl = C.fcl();
 #endif
   }
-
+  // cout << "k_order = " << k_order<<endl;
+  // cout << "T = " << T<<endl;
+  // cout <<C.frames.N<<endl;
+  // cout <<C.forces.N<<endl;
   for(uint s=0;s<k_order+T;s++) {
 //    for(KinematicSwitch* sw:switches) { //apply potential switches
 //      if(sw->timeOfApplication+(int)k_order==(int)s)  sw->apply(C.frames);

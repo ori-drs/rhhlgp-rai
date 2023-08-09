@@ -40,12 +40,12 @@ int rai::ConfigurationViewer::update(bool watch) {
     gl->text = drawText;
     if(watch) gl->text <<"\n[ENTER]";
   }
-
+  cout <<"I'm here 43"<<endl;
   if(watch) {
     gl->watch();
     gl->text = drawText();
   }
-
+  cout<<"I'm here 44"<<endl;
   return gl->update(nullptr, false);
 }
 
@@ -66,13 +66,20 @@ int rai::ConfigurationViewer::setConfiguration(const rai::Configuration& _C, con
       }
     }
   }
+  cout<<"I'm here 69"<<endl;
   if(copyMeshes) recopyMeshes(_C);
 
   if(_C.proxies.N) {
     auto _dataLock = gl->dataLock(RAI_HERE);
     C.copyProxies(_C.proxies);
   }
-
+  cout<<"I'm here 70"<<endl;
+  {
+    auto _dataLock = gl->dataLock(RAI_HERE);
+    C.copy(_C, true);
+    if(text) drawText = text;
+  }
+  cout <<"I'm here 71"<<endl;
   {
     auto _dataLock = gl->dataLock(RAI_HERE);
     framePath = _C.getFrameState();
@@ -81,7 +88,7 @@ int rai::ConfigurationViewer::setConfiguration(const rai::Configuration& _C, con
     drawSubFrames.clear();
     if(text) drawText = text;
   }
-
+  cout <<"I'm here 72"<<endl;
   return update(watch);
 }
 
@@ -170,6 +177,7 @@ bool rai::ConfigurationViewer::playVideo(uint T, uint nFrames, bool watch, doubl
   }
   drawText = tag;
   if(watch && rai::getInteractivity()) {
+    cout<<"hit ENTER to continue"<<endl;
     int key = update(true);
     drawSubFrames.clear();
     return !(key==27 || key=='q');
