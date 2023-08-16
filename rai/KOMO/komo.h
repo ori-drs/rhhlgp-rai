@@ -36,6 +36,8 @@ enum SkeletonSymbol {
   SY_above,
   SY_inside,
   SY_oppose,
+  SY_open,
+  SY_close,
 
   SY_impulse, //old
   SY_initial,

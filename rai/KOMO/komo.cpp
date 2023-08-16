@@ -720,6 +720,30 @@ void KOMO::setSkeleton(const Skeleton &S)
 
       break;
     }
+    case SY_open:
+    {
+      rai::Frame *objFrame = world.getFrame(s.frames(1));
+      arr posObjFrame = objFrame->getPosition();
+      double objSize = shapeSize(world, s.frames(1), 2);
+      addObjective({s.phase0, s.phase1}, FS_position, {s.frames(1)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0), objFrame->getPosition().elem(1) + 0.5, objFrame->getPosition().elem(2)});
+      addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(1)}, OT_eq, {1e3}, {1., 0.0, 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(1)}, OT_eq, {1e3}, {0., 1.0, 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorZ, {s.frames(1)}, OT_eq, {1e3}, {0., 0.0, 1.});
+
+      break;
+    }
+    case SY_close:
+    {
+      rai::Frame *objFrame = world.getFrame(s.frames(1));
+      arr posObjFrame = objFrame->getPosition();
+      double objSize = shapeSize(world, s.frames(1), 2);
+      addObjective({s.phase0, s.phase1}, FS_position, {s.frames(1)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0), objFrame->getPosition().elem(1) - 0.5, objFrame->getPosition().elem(2)});
+      addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(1)}, OT_eq, {1e3}, {1., 0.0, 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(1)}, OT_eq, {1e3}, {0., 1.0, 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorZ, {s.frames(1)}, OT_eq, {1e3}, {0., 0.0, 1.});
+
+      break;
+    }
 
     case SY_above:
       addObjective({s.phase0, s.phase1}, FS_aboveBox, {s.frames(0), s.frames(1)}, OT_ineq, {1e1});
@@ -942,7 +966,7 @@ void KOMO::add_collision(bool hardConstraint, double margin, double prec)
   { // interpreted as hard constraint (default)
     addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"ALL"}, OT_eq, {prec}, NoArr);
     // addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"coll_load_link_Yaw", "load_link_Yaw", "obj0", "obj1", "table2"}, OT_eq, {prec}, NoArr);
-    addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"obj0", "table2"}, OT_eq, {prec}, NoArr);
+    // addObjective({}, make_shared<F_AccumulatedCollisions>(margin), {"obj0", "table2"}, OT_eq, {prec}, NoArr);
   }
   else
   { // cost term
@@ -2839,6 +2863,8 @@ const char *rai::Enum<SkeletonSymbol>::names[] = {
     "above",
     "inside",
     "oppose",
+    "open",
+    "close",
 
     "impulse",
     "initial",

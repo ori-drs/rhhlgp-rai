@@ -191,7 +191,7 @@ PathBound::PathBound(ptr<KOMO>& komo,
   komo->setModel(startKinematics, collisions);
   uint stepsPerPhase = rai::getParameter<uint>("LGP/stepsPerPhase", 10);
   uint pathOrder = rai::getParameter<uint>("LGP/pathOrder", 2);
-  komo->setTiming(maxPhase+0.5, stepsPerPhase, 10., pathOrder);
+  komo->setTiming(maxPhase, stepsPerPhase, 10., pathOrder);
   komo->animateOptimization = 0;
 
   komo->addSquaredQuaternionNorms();
@@ -227,7 +227,7 @@ SeqPathBound::SeqPathBound(ptr<KOMO>& komo,
   komo->setModel(startKinematics, collisions);
   uint stepsPerPhase = rai::getParameter<uint>("LGP/stepsPerPhase", 10);
   uint pathOrder = rai::getParameter<uint>("LGP/pathOrder", 2);
-  komo->setTiming(maxPhase+0.5, stepsPerPhase, 10., pathOrder);
+  komo->setTiming(maxPhase, stepsPerPhase, 10., pathOrder);
   komo->animateOptimization = 0;
 
   komo->addSquaredQuaternionNorms();
