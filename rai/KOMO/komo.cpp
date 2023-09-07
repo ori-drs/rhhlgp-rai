@@ -552,7 +552,6 @@ void KOMO::setSkeleton(const Skeleton& S) {
       case SY_end: break; //explicit redundant symbol, e.g. to mark the end of a skeleton
       case SY_initial: case SY_identical: case SY_noCollision:    break;
       // case SY_touch:      addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2});  break;
-      case SY_touch:      addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2});  break;
       case SY_touch:      addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e3});  break;
       case SY_above:      addObjective({s.phase0, s.phase1}, FS_aboveBox, {s.frames(0), s.frames(1)}, OT_ineq, {1e1});  break;
       case SY_inside:     addObjective({s.phase0, s.phase1}, FS_insideBox, {s.frames(0), s.frames(1)}, OT_ineq, {1e1});  break;
@@ -724,7 +723,7 @@ void KOMO::add_collision(bool hardConstraint, double margin, double prec) {
 
 void KOMO::add_jointLimits(bool hardConstraint, double margin, double prec) {
   if(hardConstraint) { //interpreted as hard constraint (default)
-    addObjective({}, make_shared<F_qLimits>(), {"ALL"}, OT_ineq, {prec}, NoArr);
+    addObjective({}, make_shared<F_qLimits>(), {"ALL"}, OT_ineq, {1e1}, NoArr);
   } else { //cost term
     NIY;
 //    setTask(0., -1., new TM_Proxy(TMT_allP, {}, margin), OT_sos, NoArr, prec);
