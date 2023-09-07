@@ -1123,7 +1123,7 @@ void rai::Joint::read(const Graph& G) {
   G.get(ctrl_limits, "ctrl_limits");
   if(ctrl_limits.N && type!=JT_rigid) {
     if(!limits.N) limits.resizeAs(ctrl_limits).setZero();
-    CHECK_EQ(3, ctrl_limits.N, "parsed ctrl_limits have wrong dimension");
+    // CHECK_EQ(3, ctrl_limits.N, "parsed ctrl_limits have wrong dimension");
     limits.append(ctrl_limits);
   }
 
