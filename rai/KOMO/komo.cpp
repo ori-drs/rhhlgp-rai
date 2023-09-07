@@ -490,6 +490,26 @@ ptr<Objective> KOMO::add_qControlObjective(const arr& times, uint order, double 
 //  scale *= sqrt(tau);
 
   CHECK_GE(k_order, order, "");
+   if (order == 0)
+   {
+    F.scale.elem(0) = 1e2;
+    F.scale.elem(1) = 1e2;
+    F.scale.elem(2) = 1e2;
+     F.scale.elem(3) = 1e3;
+    // // F.scale.elem(1) = 1e1;
+    // F.scale.elem(2) = 1e-1;
+    F.scale.elem(4) = 1e1;
+
+    F.scale.elem(5) = 1e3;
+    F.scale.elem(6) = 1e2;
+    F.scale.elem(7) = 1e3;
+    F.scale.elem(8) = 1e2;
+    F.scale.elem(9) = 1e2;
+    F.scale.elem(10) = 1e2;
+    F.scale.elem(11) = 1e3;
+
+  }
+
   ptr<Objective> o = addObjective(times, make_shared<F_qItself>(F.frames, (order==0)), {}, OT_sos, scale*F.scale, target, order, deltaFromStep, deltaToStep);
   o->feat->timeIntegral=1;
   return o;
