@@ -78,7 +78,7 @@ Shape* getShape(const Configuration& K, const char* name) {
 
 KOMO::KOMO() : computeCollisions(true), verbose(1) {
   verbose = getParameter<double>("KOMO/verbose", 1);
-  animateOptimization = getParameter<double>("KOMO/animateOptimization", 0);
+  animateOptimization = getParameter<double>("KOMO/animateOptimization", 1);
   solver = getParameter<rai::Enum<rai::KOMOsolver>>("KOMO/solver", KS_sparse);
 }
 
