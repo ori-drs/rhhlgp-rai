@@ -147,8 +147,8 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
     for (int i=0; i<waypoints.N; i++) {
       cout <<"step "<<i <<"'s length : "<<waypoints(i).N <<endl;
     }
-    // rai::String ee_name = "hsrG";
-    rai::String ee_name = "pr2R";
+    rai::String ee_name = "hsrG";
+    // rai::String ee_name = "pr2R";
     arrA cart_waypoints = (komoProblem(BD_seq)->getPath_X_pos(ee_name));
     cout <<"get path x: " << (komoProblem(BD_seq)->getPath_X_pos(ee_name))<<endl;
     LGP_NodeL path = getTreePath();
@@ -165,24 +165,25 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose, bool wayp
         cout << "rg_waypoints: " << rg_waypoints << endl;
         if (rg_waypoints.N) {        
           for(uint j=0; j<rg_waypoints.N; j++) {
-            rai::Configuration C_ = startKinematics;
-            rai::Frame *f = C_.addFrame("waypoint");
-            f->setPosition({rg_waypoints(j)});         
-            KOMO ik_komo;
-            ik_komo.verbose = 0;
-            ik_komo.setModel(C_);
-            ik_komo.setIKOpt();
-            ik_komo.add_collision(true, 0, 1e2);
-            // ik_komo.addObjective({}, FS_positionDiff, {"worldTranslationRotation", "waypoint"}, OT_eq, {1e3});
-            ik_komo.addObjective({}, FS_positionDiff, {ee_name, "waypoint"}, OT_eq, {1e3});
-            ik_komo.optimize();
-            cout << "IK: "<<ik_komo.x << endl;
+            // rai::Configuration C_ = startKinematics;
+            // rai::Frame *f = C_.addFrame("waypoint");
+            // f->setPosition({rg_waypoints(j)});         
+            // KOMO ik_komo;
+            // ik_komo.verbose = 0;
+            // ik_komo.setModel(C_);
+            // ik_komo.setIKOpt();
+            // ik_komo.add_collision(true, 0, 1e2);
+            // // ik_komo.addObjective({}, FS_positionDiff, {"worldTranslationRotation", "waypoint"}, OT_eq, {1e3});
+            // ik_komo.addObjective({}, FS_positionDiff, {ee_name, "waypoint"}, OT_eq, {1e3});
+            // ik_komo.optimize();
+            // cout << "IK: "<<ik_komo.x << endl;
 
             arr tmp_pose;
-            if (ee_name = "pr2R") 
-              // tmp_pose =  {rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2),0, 0, 0, 0, 0, 0, 0};
-              tmp_pose =  ik_komo.x;
-            else if (ee_name == "hsrG") tmp_pose = {0, 0, 0, 0, 0,  rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2)};  
+            // if (ee_name = "pr2R") 
+            //   tmp_pose =  {rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2),0, 0, 0, 0, 0, 0, 0};
+            //   // tmp_pose =  ik_komo.x;
+            // else if (ee_name == "hsrG") 
+            tmp_pose = {0, 0, 0, 0, 0,  rg_waypoints(j)(0), rg_waypoints(j)(1), rg_waypoints(j)(2)};  
             // add obj joints so that the graph's waypoints have the same dofs with the switch waypoints
             for(uint k=tmp_pose.N; k<(waypoints(i).N); k++) {
               tmp_pose.setAppend(waypoints(i)(k));

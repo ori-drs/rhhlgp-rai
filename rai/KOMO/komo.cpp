@@ -859,7 +859,7 @@ void KOMO::initWithWaypoints(const uint number_of_phases, const arrA& waypoints,
 //     uint Tstop=T;
 //     cout <<"T="<< T<< endl;
 //     if (i+1<steps.N && steps(i+1)<T) Tstop=steps(i+1);
-//     cout<< Tstart << " " << Tstop << endl;
+//     cout<< Tstart << " " << Tstop << endl; 
 //     cout<< incremental_step  << " " << override_ind << " " << waypointStepsPerPhase(i) << endl;
 
 //     for(uint t=steps(i); t<Tstop; t++) {

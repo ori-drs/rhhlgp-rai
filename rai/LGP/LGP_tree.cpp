@@ -691,8 +691,14 @@ void LGP_Tree::step() {
       }
 			focusNode->komoProblem(bound)->view(false, "optimized motion");
       cout<<"final result shown"<<endl;
+      while (true){
+        cout<<"press q to continue"<<endl;
+        char c;
+        std::cin >> c;
+        if (c == 'q') exit(0);
+      }
       // exit(0);
-			focusNode->komoProblem(bound)->view_play(true); 				//< press q to continue after video was displayed
+			// focusNode->komoProblem(bound)->view_play(true); 				//< press q to continue after video was displayed
     }
   }
 
