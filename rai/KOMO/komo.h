@@ -30,6 +30,7 @@ enum SkeletonSymbol {
 
   //geometric:
   SY_touch,
+  SY_touch_cilinder,
   SY_graspTop,
   SY_locomote,
   SY_lift,

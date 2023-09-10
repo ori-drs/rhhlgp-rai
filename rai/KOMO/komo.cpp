@@ -661,6 +661,15 @@ void KOMO::setSkeleton(const Skeleton &S)
     case SY_touch:
       addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2});
       break;
+    case SY_touch_cilinder:
+    {
+      addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2});
+      // addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(0)}, OT_eq, {1e3}, {1., 0.0, 0.});
+      double pitch = 0.8;
+      // addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(0)}, OT_eq, {1e3}, {0., std::cos(pitch),  std::sin(pitch)});
+      addObjective({s.phase0, s.phase1}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e3}, {0., -std::sin(pitch + M_PI), std::cos(pitch + M_PI)});
+      break;
+    }
     case SY_graspTop:
     {
       double objSize = shapeSize(world, s.frames(1), 2);
@@ -734,12 +743,12 @@ void KOMO::setSkeleton(const Skeleton &S)
       double distance = 0.5;
       double delta_x = std::sin(yaw) * distance;
       double delta_y = std::cos(yaw) * distance;
-      addObjective({s.phase0, s.phase1}, FS_position, {s.frames(1)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0) + delta_x, objFrame->getPosition().elem(1) + delta_y, objFrame->getPosition().elem(2)});
-      addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(1)}, OT_eq, {1e3}, {1., 0.0, 0.});
-      addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(1)}, OT_eq, {1e3}, {0., 1.0, 0.});
+      addObjective({s.phase0, s.phase1}, FS_position, {s.frames(1)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0) - delta_x, objFrame->getPosition().elem(1) + delta_y, objFrame->getPosition().elem(2)});
+      addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(1)}, OT_eq, {1e3}, {std::cos(yaw),  std::sin(yaw), 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(1)}, OT_eq, {1e3}, {-std::sin(yaw), std::cos(yaw), 0.});
       addObjective({s.phase0, s.phase1}, FS_vectorZ, {s.frames(1)}, OT_eq, {1e3}, {0., 0.0, 1.});
-      addObjective({s.phase0, s.phase0}, FS_vectorX, {s.frames(0)}, OT_eq, {1e3}, {1., 0.0, 0.});
-      addObjective({s.phase0, s.phase0}, FS_vectorY, {s.frames(0)}, OT_eq, {1e3}, {0., -1.0, 0.});
+      addObjective({s.phase0, s.phase0}, FS_vectorX, {s.frames(0)}, OT_eq, {1e3}, {std::cos(yaw), std::sin(yaw), 0.});
+      addObjective({s.phase0, s.phase0}, FS_vectorY, {s.frames(0)}, OT_eq, {1e3}, {-std::sin(yaw + M_PI), std::cos(yaw + M_PI), 0.});
       addObjective({s.phase0, s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e3}, {0., 0.0, -1.});
 
       break;
@@ -749,12 +758,16 @@ void KOMO::setSkeleton(const Skeleton &S)
       rai::Frame *objFrame = world.getFrame(s.frames(1));
       // arr posObjFrame = objFrame->getPosition();
       // double objSize = shapeSize(world, s.frames(1), 2);
+      auto quaternion = objFrame->getQuaternion();
+      double siny_cosp = 2 * (quaternion.elem(0) * quaternion.elem(3) + quaternion.elem(1) * quaternion.elem(2));
+      double cosy_cosp = 1 - 2 * (quaternion.elem(2) * quaternion.elem(2) + quaternion.elem(3) * quaternion.elem(3));
+      double yaw = std::atan2(siny_cosp, cosy_cosp);
       addObjective({s.phase0, s.phase1}, FS_position, {s.frames(1)}, OT_eq, {1e2}, {objFrame->getPosition().elem(0), objFrame->getPosition().elem(1), objFrame->getPosition().elem(2)});
-      addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(1)}, OT_eq, {1e3}, {1., 0.0, 0.});
-      addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(1)}, OT_eq, {1e3}, {0., 1.0, 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(1)}, OT_eq, {1e3}, {std::cos(yaw),  std::sin(yaw), 0.});
+      addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(1)}, OT_eq, {1e3}, {-std::sin(yaw), std::cos(yaw), 0.});
       addObjective({s.phase0, s.phase1}, FS_vectorZ, {s.frames(1)}, OT_eq, {1e3}, {0., 0.0, 1.});
-      addObjective({s.phase0, s.phase0}, FS_vectorX, {s.frames(0)}, OT_eq, {1e3}, {1., 0.0, 0.});
-      addObjective({s.phase0, s.phase0}, FS_vectorY, {s.frames(0)}, OT_eq, {1e3}, {0., -1.0, 0.});
+      addObjective({s.phase0, s.phase0}, FS_vectorX, {s.frames(0)}, OT_eq, {1e3}, {std::cos(yaw), std::sin(yaw), 0.});
+      addObjective({s.phase0, s.phase0}, FS_vectorY, {s.frames(0)}, OT_eq, {1e3}, {-std::sin(yaw + M_PI), std::cos(yaw + M_PI), 0.});
       addObjective({s.phase0, s.phase0}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e3}, {0., 0.0, -1.});
 
       break;
@@ -2872,6 +2885,7 @@ void KOMO::TimeSliceProblem::evaluate(arr& phi, arr& J, const arr& x) {
 template <>
 const char *rai::Enum<SkeletonSymbol>::names[] = {
     "touch",
+    "touch_cilinder",
     "graspTop",
     "move",
     "lift",
