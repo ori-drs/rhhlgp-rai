@@ -665,7 +665,7 @@ void KOMO::setSkeleton(const Skeleton &S)
     {
       addObjective({s.phase0, s.phase1}, FS_distance, {s.frames(0), s.frames(1)}, OT_eq, {1e2});
       // addObjective({s.phase0, s.phase1}, FS_vectorX, {s.frames(0)}, OT_eq, {1e3}, {1., 0.0, 0.});
-      double pitch = 0.8;
+      double pitch = 0.2;
       // addObjective({s.phase0, s.phase1}, FS_vectorY, {s.frames(0)}, OT_eq, {1e3}, {0., std::cos(pitch),  std::sin(pitch)});
       addObjective({s.phase0, s.phase1}, FS_vectorZ, {s.frames(0)}, OT_eq, {1e3}, {0., -std::sin(pitch + M_PI), std::cos(pitch + M_PI)});
       break;

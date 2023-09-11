@@ -208,7 +208,7 @@ void LGP_Node::optBound(BoundType bound, bool collisions, int verbose) {
     constraints_here = komo->ineq + komo->eq;
   }
 
-  bool feas = (bound==BD_seqPath) ? (constraints_here<110.1) : (constraints_here<110.1);
+  bool feas = (bound==BD_seqPath) ? (constraints_here<600.1) : (constraints_here<600.1);
   // bool feas = (bound==BD_seqPath) ? (constraints_here<0.5) : (constraints_here<0.5);
 
   // if(komo->verbose>0) {
