@@ -11,6 +11,8 @@
 #include "LGP_node.h"
 #include "../Kin/viewer.h"
 #include "../Core/thread.h"
+#include "../KOMO/komo.h"
+#include "../LGP/LGP_tree.h"
 
 struct KinPathViewer;
 struct LGP_Tree;
@@ -128,6 +130,8 @@ struct LGP_Tree : GLDrawer {
 
 	//-- QLGP
 	void seqBoundCostToGo(LGP_Node *node);
+
+  void settingDesiredRotationGripper(arr &desiredOrientation);
 };
 
 struct LGP_Tree_Thread : LGP_Tree, Thread {
