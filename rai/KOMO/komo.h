@@ -30,9 +30,18 @@ enum SkeletonSymbol {
 
   //geometric:
   SY_touch,
+  SY_touch_cilinder,
   SY_above,
   SY_inside,
   SY_oppose,
+  SY_gripperOrientation, 
+  SY_pitchGripperDown,
+  SY_poseGripper,
+  SY_rotateBase,
+  SY_open,
+  SY_objectOrientation,
+  SY_close,
+  SY_objectOrientationConstant,
 
   SY_impulse, //old
   SY_initial,
@@ -86,9 +95,13 @@ enum SkeletonSymbol {
   SY_touchBoxNormalY,
   SY_touchBoxNormalZ,
 
+  SY_graspTop,
   SY_end,
 
 };
+
+  static arr desiredGripperOrientation;
+
 
 struct SkeletonEntry {
   double phase0=-1.;
@@ -214,6 +227,8 @@ protected:
                  const char* ref1, const char* ref2,
                  const rai::Transformation& jFrom=NoTransformation, const rai::Transformation& jTo=NoTransformation);
 public:
+  void setDesiredGripperOrientation(arr &gripperOrientation);
+
   //add a mode switch: both, the low-level dof switches and corresponding constraints of consistency
   void addModeSwitch(const arr& times, SkeletonSymbol newMode, const StringA& frames, bool firstSwitch);
 
