@@ -25,6 +25,7 @@ struct F_qItself : Feature {
   virtual void phi2(arr& y, arr& J, const FrameL& F);
   virtual uint dim_phi(const rai::Configuration& C);
   virtual uint dim_phi2(const FrameL& F);
+  void printActiveJointNames(arr &q, const FrameL& F);
  private:
   std::map<rai::Configuration*, uint> dimPhi;
 };
