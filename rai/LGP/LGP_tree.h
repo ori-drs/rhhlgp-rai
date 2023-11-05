@@ -13,13 +13,16 @@
 #include "../Core/thread.h"
 #include "../KOMO/komo.h"
 #include "../LGP/LGP_tree.h"
-
+#include <chrono>
+#include "../LGP/Timing.h"
 struct KinPathViewer;
 struct LGP_Tree;
 struct DisplayThread;
 typedef rai::Array<rai::Transformation> TransformationA;
 
 void initFolStateFromKin(FOL_World& L, const rai::Configuration& K);
+
+extern std::chrono::high_resolution_clock::time_point start;
 
 struct LGP_Tree_SolutionData : GLDrawer {
   LGP_Tree& tree;
@@ -89,6 +92,7 @@ struct LGP_Tree : GLDrawer {
   void clearFromInfeasibles(LGP_NodeL& fringe);
 
  public:
+  Timing timer;
   void run(uint steps=300000);
   void init();
   void step();
