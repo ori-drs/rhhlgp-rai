@@ -14,7 +14,6 @@
 #include "../KOMO/komo.h"
 #include "../LGP/LGP_tree.h"
 #include <chrono>
-#include "../LGP/Timing.h"
 struct KinPathViewer;
 struct LGP_Tree;
 struct DisplayThread;
@@ -92,7 +91,6 @@ struct LGP_Tree : GLDrawer {
   void clearFromInfeasibles(LGP_NodeL& fringe);
 
  public:
-  Timing timer;
   void run(uint steps=300000);
   void init();
   void step();

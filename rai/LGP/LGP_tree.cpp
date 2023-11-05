@@ -810,14 +810,6 @@ void LGP_Tree::step()
   if (fringe_path.N)
   {
     cout << "EVALUATING PATH " << fringe_path.last()->getTreePathString() << endl;
-
-    // Stop the timer
-    timer.stopTimer();
-
-    // Get and print the duration
-    long long durationMicroseconds = timer.getDurationMicroseconds();               // Get the duration in microseconds
-double durationSeconds = static_cast<double>(durationMicroseconds) / 1000000.0; // Convert to seconds
-    std::cout << "Time taken to reach EVALUATING PATH: " << durationSeconds << " seconds" << std::endl;
   }
   optBestOnLevel(BD_seqPath, fringe_path, BD_seq, &fringe_solved, nullptr);
 
@@ -926,8 +918,6 @@ void LGP_Tree::run(uint steps)
   uint stopSol = rai::getParameter<double>("LGP/stopSol", 12);
   double stopTime = rai::getParameter<double>("LGP/stopTime", 400.);
 
-  // Start the timer
-  timer.startTimer();
 
   for (uint k = 0; k < steps; k++)
   {
